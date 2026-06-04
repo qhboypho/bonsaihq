@@ -1,0 +1,114 @@
+"use client";
+
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { translations } from "../lib/translations";
+import { getDbState, saveDbState } from "../lib/db";
+
+// Contexts
+const AppContext = createContext(null);
+
+export function AppProvider({ children }) {
+    // Theme and Language states (Client-side initialized to prevent SSR mismatch)
+    const [theme, setThemeState] = useState("light");
+    const [lang, setLangState] = useState("vi");
+    const [db, setDb] = useState({ artisans: {}, trees: [], moderationRequired: false });
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        // Run on client mount
+        const storedTheme = localStorage.getItem("bh_theme") || "light";
+        const storedLang = localStorage.getItem("bh_lang") || "vi";
+        
+        setThemeState(storedTheme);
+        setLangState(storedLang);
+        
+        document.documentElement.setAttribute('data-theme', storedTheme);
+        
+        // Load database state
+        const dbState = getDbState();
+        setDb(dbState);
+        
+        setMounted(true);
+    }, []);
+
+    const setTheme = (newTheme) => {
+        setThemeState(newTheme);
+        localStorage.setItem("bh_theme", newTheme);
+        document.documentElement.setAttribute('data-theme', newTheme);
+    };
+
+    const setLang = (newLang) => {
+        setLangState(newLang);
+        localStorage.setItem("bh_lang", newLang);
+    };
+
+    const updateDb = (updater) => {
+        setDb(prev => {
+            const nextDb = typeof updater === "function" ? updater(prev) : updater;
+            saveDbState(nextDb);
+            return nextDb;
+        });
+    };
+
+    // Translation helper
+    const t = (key) => {
+        const text = translations[lang] && translations[lang][key];
+        return text || key;
+    };
+
+    // Get localized text from database values (e.g. tree.title has vi, en, jp subfields)
+    const localize = (obj) => {
+        if (!obj) return "";
+        if (typeof obj === "string") return obj;
+        return obj[lang] || obj["vi"] || "";
+    };
+
+    // Toast notification manager
+    const [toasts, setToasts] = useState([]);
+    const showToast = (message, type = "success") => {
+        const id = Date.now();
+        setToasts(prev => [...prev, { id, message, type }]);
+        
+        // Auto remove
+        setTimeout(() => {
+            setToasts(prev => prev.filter(t => t.id !== id));
+        }, 3800);
+    };
+
+    const value = {
+        theme,
+        setTheme,
+        lang,
+        setLang,
+        db,
+        updateDb,
+        t,
+        localize,
+        showToast,
+        mounted
+    };
+
+    return (
+        <AppContext.Provider value={value}>
+            {children}
+            {/* Toast Container */}
+            <div className="toast-container">
+                {toasts.map(toast => (
+                    <div key={toast.id} className={`toast ${toast.type === "error" ? "toast-error" : ""}`}>
+                        <i className={`toast-icon fa-solid ${toast.type === "error" ? "fa-circle-exclamation" : "fa-circle-check"}`}></i>
+                        <span className="toast-msg">{toast.message}</span>
+                    </div>
+                ))}
+            </div>
+        </AppContext.Provider>
+    );
+}
+
+// Custom hooks
+export function useApp() {
+    const context = useContext(AppContext);
+    if (!context) {
+        throw new Error("useApp must be used within an AppProvider");
+    }
+    return context;
+}
