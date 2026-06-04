@@ -19,7 +19,7 @@
     --color-danger: #9A2A2B;     /* Đỏ dấu triện son */
     --border-color: #D3C9B9;
     --border-hover: #B7A690;
-    --glass-bg: rgba(243, 236, 224, 0.75);
+    --glass-bg: rgba(243, 236, 224, 0.96);
     --glass-border: rgba(211, 201, 185, 0.4);
     --shadow-color: rgba(25, 39, 32, 0.06);
     --shadow-hover: rgba(25, 39, 32, 0.12);
@@ -42,7 +42,7 @@
     --color-danger: #E25D5E;     /* Triện son tươi */
     --border-color: #25332C;
     --border-hover: #3E5045;
-    --glass-bg: rgba(18, 26, 22, 0.85);
+    --glass-bg: rgba(18, 26, 22, 0.97);
     --glass-border: rgba(37, 51, 44, 0.6);
     --shadow-color: rgba(0, 0, 0, 0.3);
     --shadow-hover: rgba(0, 0, 0, 0.55);

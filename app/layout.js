@@ -15,7 +15,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="vi">
+        <html lang="vi" suppressHydrationWarning={true}>
             <head>
                 {/* Preconnect & Google Fonts */}
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
                 {/* FontAwesome for Icons */}
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
             </head>
-            <body>
+            <body suppressHydrationWarning={true}>
                 <AppProvider>
                     <LayoutContent>
                         {children}

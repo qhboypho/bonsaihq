@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { useApp } from "../providers";
 
 const MOCK_BONSAI_PHOTOS = [
-    "https://images.unsplash.com/photo-1613143714311-6677f5f90382?w=800&q=80",
-    "https://images.unsplash.com/photo-1520302873425-2404eb5212d7?w=800&q=80",
-    "https://images.unsplash.com/photo-1512428813824-7b9e29a290a0?w=800&q=80",
-    "https://images.unsplash.com/photo-1566908829550-e6551b00979b?w=800&q=80",
-    "https://images.unsplash.com/photo-1510253687831-0f982d7862fc?w=800&q=80"
+    "https://images.unsplash.com/photo-1599598177991-ec67b5c37318?w=800&q=80",
+    "https://images.unsplash.com/photo-1627347902083-edbcaa5c4286?w=800&q=80",
+    "https://images.unsplash.com/photo-1641412722397-3be359096577?w=800&q=80",
+    "https://images.unsplash.com/photo-1561641250-c06551cf3b02?w=800&q=80",
+    "https://images.unsplash.com/photo-1683491175728-5921087a95ac?w=800&q=80"
 ];
 
 export default function UploadTree() {
