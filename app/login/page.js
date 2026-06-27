@@ -10,7 +10,7 @@ function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { showToast, refreshSession } = useApp();
-    const [email, setEmail] = useState("admin@bonsaihoiquan.local");
+    const [username, setUsername] = useState("admin");
     const [password, setPassword] = useState("admin123");
     const [submitting, setSubmitting] = useState(false);
 
@@ -18,7 +18,7 @@ function LoginForm() {
         event.preventDefault();
         setSubmitting(true);
         try {
-            await api.login({ email, password });
+            await api.login({ username, password });
             await refreshSession();
             showToast("Đăng nhập quản trị thành công.");
             router.push(searchParams.get("next") || "/admin/moderation");
@@ -39,8 +39,8 @@ function LoginForm() {
             <form className="form-section-card" onSubmit={handleSubmit}>
                 <div className="form-grid">
                     <div className="form-group-full">
-                        <label>Email</label>
-                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                        <label>Tên đăng nhập</label>
+                        <input value={username} onChange={(e) => setUsername(e.target.value)} required />
                     </div>
                     <div className="form-group-full">
                         <label>Mật khẩu</label>

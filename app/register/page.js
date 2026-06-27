@@ -11,10 +11,11 @@ export default function RegisterPage() {
     const { showToast, refreshSession } = useApp();
     const [form, setForm] = useState({
         name: "",
+        username: "",
         email: "",
         password: "",
         phone: "",
-        zalo: "",
+        facebook: "",
         address: "",
     });
     const [submitting, setSubmitting] = useState(false);
@@ -52,20 +53,24 @@ export default function RegisterPage() {
                         <input value={form.name} onChange={(e) => updateField("name", e.target.value)} required />
                     </div>
                     <div className="form-group-full">
-                        <label>Email <span className="required">*</span></label>
-                        <input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} required />
+                        <label>Tên đăng nhập <span className="required">*</span></label>
+                        <input value={form.username} onChange={(e) => updateField("username", e.target.value)} required placeholder="vd: vuon_sanh_ba" />
+                    </div>
+                    <div className="form-group-full">
+                        <label>Email <span className="form-help-text">(không bắt buộc)</span></label>
+                        <input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} />
                     </div>
                     <div className="form-group-full">
                         <label>Mật khẩu <span className="required">*</span></label>
                         <input type="password" minLength={6} value={form.password} onChange={(e) => updateField("password", e.target.value)} required />
                     </div>
                     <div className="form-group">
-                        <label>Điện thoại</label>
+                        <label>Điện thoại/Zalo</label>
                         <input value={form.phone} onChange={(e) => updateField("phone", e.target.value)} />
                     </div>
                     <div className="form-group">
-                        <label>Zalo URL</label>
-                        <input value={form.zalo} onChange={(e) => updateField("zalo", e.target.value)} placeholder="https://zalo.me/..." />
+                        <label>Facebook URL</label>
+                        <input value={form.facebook} onChange={(e) => updateField("facebook", e.target.value)} placeholder="https://facebook.com/..." />
                     </div>
                     <div className="form-group-full">
                         <label>Địa chỉ vườn</label>

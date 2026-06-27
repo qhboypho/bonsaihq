@@ -146,11 +146,11 @@ export default function AdminArtisansPage() {
                         <input value={form.address} onChange={(e) => updateField("address", e.target.value)} />
                     </div>
                     <div className="form-group">
-                        <label>Điện thoại</label>
+                        <label>Điện thoại/Zalo</label>
                         <input value={form.phone} onChange={(e) => updateField("phone", e.target.value)} />
                     </div>
                     <div className="form-group">
-                        <label>Zalo URL</label>
+                        <label>Facebook URL</label>
                         <input value={form.zalo} onChange={(e) => updateField("zalo", e.target.value)} />
                     </div>
                     <div className="form-group-full">
