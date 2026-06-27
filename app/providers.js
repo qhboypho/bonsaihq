@@ -19,6 +19,7 @@ export function AppProvider({ children }) {
         return localStorage.getItem("bh_lang") || "vi";
     });
     const [db, setDb] = useState({ artisans: {}, trees: [], moderationRequired: false });
+    const [currentUser, setCurrentUser] = useState(null);
     const [mounted, setMounted] = useState(false);
 
     const refreshDb = async () => {
@@ -28,6 +29,17 @@ export function AppProvider({ children }) {
         return dbState;
     };
 
+    const refreshSession = async () => {
+        try {
+            const user = await api.me();
+            setCurrentUser(user);
+            return user;
+        } catch {
+            setCurrentUser(null);
+            return null;
+        }
+    };
+
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
     }, [theme]);
@@ -35,7 +47,13 @@ export function AppProvider({ children }) {
     useEffect(() => {
         /* eslint-disable react-hooks/set-state-in-effect */
         // Load server-backed database state, with the original local seed as a dev fallback.
-        refreshDb()
+        Promise.allSettled([refreshDb(), refreshSession()])
+            .then((results) => {
+                const dbResult = results[0];
+                if (dbResult.status === "rejected") {
+                    throw dbResult.reason;
+                }
+            })
             .catch(() => {
                 const dbState = getDbState();
                 setDb(dbState);
@@ -63,6 +81,11 @@ export function AppProvider({ children }) {
             saveDbState(nextDb);
             return nextDb;
         });
+    };
+
+    const logout = async () => {
+        await api.logout();
+        setCurrentUser(null);
     };
 
     // Translation helper
@@ -98,6 +121,9 @@ export function AppProvider({ children }) {
         db,
         updateDb,
         refreshDb,
+        currentUser,
+        refreshSession,
+        logout,
         t,
         localize,
         showToast,

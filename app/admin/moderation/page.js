@@ -67,7 +67,7 @@ export default function ModerationPage() {
     });
 
     return (
-        <div className="form-container">
+        <div className="admin-page-shell">
             <div className="form-header">
                 <h2>{t("admin_moderation_title") || "Quản Lý Cây"}</h2>
                 <p>{t("admin_moderation_subtitle") || "Quản lý bài đăng cây cảnh, trạng thái hiển thị và hàng chờ duyệt."}</p>

@@ -114,7 +114,7 @@ export default function AdminArtisansPage() {
     };
 
     return (
-        <div className="form-container">
+        <div className="admin-page-shell">
             <div className="back-link-wrapper">
                 <Link href="/admin/moderation" className="btn-back">
                     <i className="fa-solid fa-arrow-left"></i> Quản lý cây

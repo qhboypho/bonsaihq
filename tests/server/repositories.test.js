@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { rm } from "node:fs/promises";
 import path from "node:path";
 import { addGuestbookEntry, deleteArtisan, getArtisanById, saveArtisan } from "../../lib/server/repositories/artisans";
-import { getSettings, updateModerationRequired } from "../../lib/server/repositories/settings";
+import { getGoogleAuthSettings, getSettings, updateGoogleAuthSettings, updateModerationRequired } from "../../lib/server/repositories/settings";
 import { createTree, listTrees, updateTreeApproval } from "../../lib/server/repositories/trees";
 
 const dataDir = path.join(process.cwd(), ".data");
@@ -81,5 +81,27 @@ describe("server repositories", () => {
         expect(artisan.name).toBe("Test Artisan");
         expect(await deleteArtisan("test_artisan")).toBe(true);
         expect(await getArtisanById("test_artisan")).toBeNull();
+    });
+
+    it("persists Google OAuth settings without clearing an existing secret", async () => {
+        const configured = await updateGoogleAuthSettings({
+            clientId: "123456.apps.googleusercontent.com",
+            clientSecret: "super-secret",
+            redirectUri: "http://localhost:3000/api/auth/callback",
+        });
+
+        expect(configured.configured).toBe(true);
+        expect(configured.hasClientSecret).toBe(true);
+
+        await updateGoogleAuthSettings({
+            clientId: "123456.apps.googleusercontent.com",
+            clientSecret: "",
+            redirectUri: "http://localhost:3001/api/auth/callback",
+            keepSecret: true,
+        });
+
+        const reloaded = await getGoogleAuthSettings({ includeSecret: true });
+        expect(reloaded.clientSecret).toBe("super-secret");
+        expect(reloaded.redirectUri).toBe("http://localhost:3001/api/auth/callback");
     });
 });

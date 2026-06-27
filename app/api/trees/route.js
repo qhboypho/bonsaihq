@@ -1,5 +1,5 @@
 import { fail, ok, serverError } from "../../../lib/server/errors";
-import { getCurrentUser } from "../../../lib/server/auth";
+import { requireUser } from "../../../lib/server/auth";
 import { canCreateTree } from "../../../lib/server/permissions";
 import { createTree, listTrees } from "../../../lib/server/repositories/trees";
 import { validateTreePayload } from "../../../lib/server/validation";
@@ -31,7 +31,10 @@ export async function POST(request) {
             return fail(400, "VALIDATION_ERROR", "Tree payload is invalid.", parsed.fields);
         }
 
-        const user = await getCurrentUser();
+        const session = await requireUser();
+        if (session.error) return fail(401, "UNAUTHENTICATED", "Please sign in before publishing a tree.");
+
+        const user = session.user;
         if (!canCreateTree(user, parsed.data.ownerId)) {
             return fail(403, "FORBIDDEN", "You are not allowed to create trees for this artisan.");
         }

@@ -7,7 +7,7 @@ import { useApp } from "./providers";
 
 export default function LayoutContent({ children }) {
     const pathname = usePathname();
-    const { theme, setTheme, lang, setLang, t, mounted } = useApp();
+    const { theme, setTheme, lang, setLang, t, mounted, currentUser, logout, showToast } = useApp();
 
     // Prevent hydration pop-ins before mounting
     if (!mounted) {
@@ -26,6 +26,15 @@ export default function LayoutContent({ children }) {
         if (path === "/" && pathname === "/") return true;
         if (path !== "/" && pathname.startsWith(path)) return true;
         return false;
+    };
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            showToast("Đã đăng xuất.");
+        } catch (error) {
+            showToast(error.message || "Không thể đăng xuất.", "error");
+        }
     };
 
     return (
@@ -63,23 +72,31 @@ export default function LayoutContent({ children }) {
                     </nav>
 
                     <div className="header-actions">
-                        <Link
-                            href="/admin/moderation"
-                            className={`admin-quick-link ${isLinkActive("/admin") ? "active" : ""}`}
-                            title={t("nav_admin") || "Quản trị"}
-                            aria-label={t("nav_admin") || "Quản trị"}
-                        >
-                            <i className="fa-solid fa-shield-halved"></i>
-                            <span>{t("nav_admin") || "Quản trị"}</span>
-                        </Link>
-                        <Link
-                            href="/login"
-                            className="theme-toggle-btn"
-                            title="Đăng nhập"
-                            aria-label="Đăng nhập"
-                        >
-                            <i className="fa-solid fa-user-lock"></i>
-                        </Link>
+                        {currentUser?.role === "ADMIN" && (
+                            <Link
+                                href="/admin/moderation"
+                                className={`admin-quick-link ${isLinkActive("/admin") ? "active" : ""}`}
+                                title={t("nav_admin") || "Quản trị"}
+                                aria-label={t("nav_admin") || "Quản trị"}
+                            >
+                                <i className="fa-solid fa-shield-halved"></i>
+                                <span>{t("nav_admin") || "Quản trị"}</span>
+                            </Link>
+                        )}
+
+                        {currentUser ? (
+                            <div className="session-chip">
+                                <span className="session-name">{currentUser.name}</span>
+                                <button onClick={handleLogout} title="Đăng xuất" aria-label="Đăng xuất">
+                                    <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="auth-links">
+                                <Link href="/login">Đăng nhập</Link>
+                                <Link href="/register">Đăng ký</Link>
+                            </div>
+                        )}
 
                         {/* Language Switcher */}
                         <div className="lang-switcher">
@@ -124,10 +141,17 @@ export default function LayoutContent({ children }) {
                     <i className="fa-solid fa-sliders"></i>
                     <span>{lang === "vi" ? "Cài đặt" : lang === "en" ? "Settings" : "設定"}</span>
                 </Link>
-                <Link href="/admin/moderation" className={`mobile-nav-link ${isLinkActive("/admin") ? "active" : ""}`}>
-                    <i className="fa-solid fa-shield-halved"></i>
-                    <span>{lang === "vi" ? "Duyệt" : lang === "en" ? "Review" : "審査"}</span>
-                </Link>
+                {currentUser?.role === "ADMIN" ? (
+                    <Link href="/admin/moderation" className={`mobile-nav-link ${isLinkActive("/admin") ? "active" : ""}`}>
+                        <i className="fa-solid fa-shield-halved"></i>
+                        <span>{lang === "vi" ? "Duyệt" : lang === "en" ? "Review" : "審査"}</span>
+                    </Link>
+                ) : (
+                    <Link href="/login" className={`mobile-nav-link ${isLinkActive("/login") || isLinkActive("/register") ? "active" : ""}`}>
+                        <i className="fa-solid fa-user-lock"></i>
+                        <span>{currentUser ? "Tài khoản" : "Login"}</span>
+                    </Link>
+                )}
             </nav>
         </div>
     );

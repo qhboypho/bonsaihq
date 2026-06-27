@@ -21,3 +21,5 @@ npm run db:seed
 ```
 
 The runtime repositories are still file-store backed until the Prisma repository swap is completed. The Prisma schema and seed are tracked so the database contract is explicit and ready for that switch.
+
+Google OAuth keys can be saved from the admin Settings screen. The runtime config resolver reads the persisted server store first and only uses `.env` values to hydrate empty settings, so saved Google keys and the session cookie secret survive refreshes, restarts, and data resets.
