@@ -9,7 +9,7 @@ import { useApp } from "../providers";
 
 export default function RegisterPage() {
     const router = useRouter();
-    const { showToast, refreshSession, currentUser, mounted } = useApp();
+    const { showToast, refreshSession, refreshDb, currentUser, mounted } = useApp();
     const [form, setForm] = useState({
         name: "",
         username: "",
@@ -35,7 +35,10 @@ export default function RegisterPage() {
         setSubmitting(true);
         try {
             await api.register(form);
-            const sessionUser = await refreshSession();
+            const [sessionUser] = await Promise.all([
+                refreshSession(),
+                refreshDb(),
+            ]);
             showToast("Đã tạo tài khoản nghệ nhân.");
             router.replace(sessionUser?.artisanId ? `/artisan/${sessionUser.artisanId}` : "/upload");
         } catch (error) {

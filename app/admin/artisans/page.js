@@ -24,7 +24,7 @@ const emptyForm = {
 export default function AdminArtisansPage() {
     const router = useRouter();
     const pathname = usePathname();
-    const { t, localize, showToast, mounted, currentUser } = useApp();
+    const { t, localize, showToast, mounted, currentUser, refreshDb } = useApp();
     const [artisans, setArtisans] = useState([]);
     const [form, setForm] = useState(emptyForm);
     const [editingId, setEditingId] = useState("");
@@ -109,6 +109,7 @@ export default function AdminArtisansPage() {
                 if (exists) return prev.map(artisan => artisan.id === saved.id ? saved : artisan);
                 return [saved, ...prev];
             });
+            await refreshDb();
             resetForm();
             showToast(saved.accountCreated ? `Đã lưu nghệ nhân và tạo tài khoản ${saved.accountUsername}.` : "Đã lưu nghệ nhân.");
         } catch (error) {
@@ -126,6 +127,7 @@ export default function AdminArtisansPage() {
         try {
             await api.deleteAdminArtisan(id);
             setArtisans(prev => prev.filter(artisan => artisan.id !== id));
+            await refreshDb();
             showToast("Đã xóa nghệ nhân.");
         } catch (error) {
             showToast(error.message || "Không thể xóa nghệ nhân đang sở hữu cây.", "error");

@@ -11,7 +11,7 @@ function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const nextPath = searchParams.get("next");
-    const { showToast, refreshSession, currentUser, mounted } = useApp();
+    const { showToast, refreshSession, refreshDb, currentUser, mounted } = useApp();
     const [username, setUsername] = useState("admin");
     const [password, setPassword] = useState("");
     const [submitting, setSubmitting] = useState(false);
@@ -26,9 +26,12 @@ function LoginForm() {
         setSubmitting(true);
         try {
             const loginUser = await api.login({ username, password });
-            const sessionUser = await refreshSession() || loginUser;
+            const [sessionUser] = await Promise.all([
+                refreshSession(),
+                refreshDb(),
+            ]);
             showToast("Đăng nhập thành công.");
-            router.replace(getSafePostAuthPath(nextPath, sessionUser));
+            router.replace(getSafePostAuthPath(nextPath, sessionUser || loginUser));
         } catch (error) {
             showToast(error.message || "Không thể đăng nhập.", "error");
         } finally {

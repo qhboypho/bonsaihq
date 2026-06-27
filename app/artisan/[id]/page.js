@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useApp } from "../../providers";
@@ -9,8 +9,10 @@ import { api } from "../../../lib/api-client";
 export default function ArtisanProfile() {
     const params = useParams();
     const artisanId = params.id || "nguyen_van_ba";
-    const { db, updateDb, t, localize, showToast } = useApp();
+    const { db, updateDb, t, localize, showToast, mounted, refreshDb, currentUser } = useApp();
     const [activeTab, setActiveTab] = useState("all-garden");
+    const [refreshingArtisan, setRefreshingArtisan] = useState(false);
+    const refreshAttemptedId = useRef("");
 
     // Guestbook form states
     const [gbName, setGbName] = useState("");
@@ -18,6 +20,38 @@ export default function ArtisanProfile() {
     const [gbContent, setGbContent] = useState("");
 
     const artisan = db.artisans[artisanId];
+
+    useEffect(() => {
+        if (!mounted || artisan || refreshingArtisan || refreshAttemptedId.current === artisanId) return;
+
+        let active = true;
+        refreshAttemptedId.current = artisanId;
+        const loadMissingArtisan = async () => {
+            setRefreshingArtisan(true);
+            try {
+                await refreshDb();
+            } catch (error) {
+                showToast(error.message || "Không thể tải hồ sơ nghệ nhân.", "error");
+            } finally {
+                if (active) setRefreshingArtisan(false);
+            }
+        };
+        loadMissingArtisan();
+
+        return () => {
+            active = false;
+        };
+    }, [artisan, artisanId, mounted, refreshDb, refreshingArtisan, showToast]);
+
+    if (!mounted || (!artisan && refreshingArtisan)) {
+        return (
+            <div style={{ textAlign: "center", padding: "100px 0" }}>
+                <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: "2.2rem", marginBottom: "16px", color: "var(--color-accent)" }}></i>
+                <h2>{t("detail_back") === "Back" ? "Loading artisan profile..." : t("detail_back") === "戻る" ? "職人プロフィールを読み込み中..." : "Đang tải hồ sơ nghệ nhân..."}</h2>
+            </div>
+        );
+    }
+
     if (!artisan) {
         return (
             <div style={{ textAlign: "center", padding: "100px 0" }}>
@@ -31,8 +65,7 @@ export default function ArtisanProfile() {
     // Get all trees for this artisan
     const allTrees = db.trees.filter(t => t.ownerId === artisanId);
     
-    // Logged in user mock check (Ba is logged in by default)
-    const isOwner = (artisanId === "nguyen_van_ba");
+    const isOwner = currentUser?.role === "ADMIN" || currentUser?.artisanId === artisanId;
     const visibleTrees = isOwner ? allTrees : allTrees.filter(t => t.approved);
 
     const exhibitTrees = visibleTrees.filter(t => t.status === "Trưng bày");
@@ -159,7 +192,7 @@ export default function ArtisanProfile() {
                         </div>
                     </div>
                     <div className="profile-actions">
-                        <a href={`tel:${artisan.phone.replace(/\./g, '')}`} className="btn-primary contact-zalo-btn">
+                        <a href={`tel:${String(artisan.phone || "").replace(/\./g, '')}`} className="btn-primary contact-zalo-btn">
                             <i className="fa-solid fa-phone"></i> {t("artisan_call")}
                         </a>
                     </div>
