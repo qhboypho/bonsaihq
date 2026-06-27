@@ -48,7 +48,7 @@ export default function LayoutContent({ children }) {
                     </Link>
 
                     <nav className="desktop-nav">
-                        <Link href="/" className={`nav-link ${isLinkActive("/") && !pathname.includes("upload") && !pathname.includes("settings") && !pathname.includes("artisan") ? "active" : ""}`}>
+                        <Link href="/" className={`nav-link ${isLinkActive("/") && !pathname.includes("upload") && !pathname.includes("settings") && !pathname.includes("artisan") && !pathname.includes("admin") ? "active" : ""}`}>
                             <i className="fa-solid fa-house"></i> {t("nav_home")}
                         </Link>
                         <Link href="/upload" className={`nav-link ${isLinkActive("/upload") ? "active" : ""}`}>
@@ -63,6 +63,16 @@ export default function LayoutContent({ children }) {
                     </nav>
 
                     <div className="header-actions">
+                        <Link
+                            href="/admin/moderation"
+                            className={`admin-quick-link ${isLinkActive("/admin") ? "active" : ""}`}
+                            title={t("nav_admin") || "Quản trị"}
+                            aria-label={t("nav_admin") || "Quản trị"}
+                        >
+                            <i className="fa-solid fa-shield-halved"></i>
+                            <span>{t("nav_admin") || "Quản trị"}</span>
+                        </Link>
+
                         {/* Language Switcher */}
                         <div className="lang-switcher">
                             <button className={`lang-btn ${lang === "vi" ? "active" : ""}`} onClick={() => setLang("vi")}>VI</button>
@@ -90,7 +100,7 @@ export default function LayoutContent({ children }) {
 
             {/* Bottom Nav (Mobile Only) */}
             <nav className="mobile-nav">
-                <Link href="/" className={`mobile-nav-link ${isLinkActive("/") && !pathname.includes("upload") && !pathname.includes("settings") && !pathname.includes("artisan") ? "active" : ""}`}>
+                <Link href="/" className={`mobile-nav-link ${isLinkActive("/") && !pathname.includes("upload") && !pathname.includes("settings") && !pathname.includes("artisan") && !pathname.includes("admin") ? "active" : ""}`}>
                     <i className="fa-solid fa-house"></i>
                     <span>{lang === "vi" ? "Sảnh" : lang === "en" ? "Hall" : "本館"}</span>
                 </Link>
@@ -105,6 +115,10 @@ export default function LayoutContent({ children }) {
                 <Link href="/settings" className={`mobile-nav-link ${isLinkActive("/settings") ? "active" : ""}`}>
                     <i className="fa-solid fa-sliders"></i>
                     <span>{lang === "vi" ? "Cài đặt" : lang === "en" ? "Settings" : "設定"}</span>
+                </Link>
+                <Link href="/admin/moderation" className={`mobile-nav-link ${isLinkActive("/admin") ? "active" : ""}`}>
+                    <i className="fa-solid fa-shield-halved"></i>
+                    <span>{lang === "vi" ? "Duyệt" : lang === "en" ? "Review" : "審査"}</span>
                 </Link>
             </nav>
         </div>

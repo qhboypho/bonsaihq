@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "../providers";
+import { api } from "../../lib/api-client";
 
 const MOCK_BONSAI_PHOTOS = [
     "https://images.unsplash.com/photo-1599598177991-ec67b5c37318?w=800&q=80",
@@ -14,7 +15,7 @@ const MOCK_BONSAI_PHOTOS = [
 
 export default function UploadTree() {
     const router = useRouter();
-    const { db, updateDb, t, showToast } = useApp();
+    const { updateDb, t, showToast } = useApp();
 
     // Form states
     const [title, setTitle] = useState("");
@@ -62,7 +63,7 @@ export default function UploadTree() {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
         if (selectedImages.length === 0) {
@@ -70,11 +71,7 @@ export default function UploadTree() {
             return;
         }
 
-        const newId = `tree_${Date.now()}`;
-        const isApproved = !db.moderationRequired;
-
-        const newTree = {
-            id: newId,
+        const payload = {
             title: {
                 vi: title,
                 en: title,
@@ -122,18 +119,22 @@ export default function UploadTree() {
             }))
         };
 
-        // Update Global Database
-        updateDb(prev => ({
-            ...prev,
-            trees: [newTree, ...prev.trees]
-        }));
+        try {
+            const newTree = await api.createTree(payload);
+            updateDb(prev => ({
+                ...prev,
+                trees: [newTree, ...prev.trees]
+            }));
 
-        if (isApproved) {
-            showToast(t("toast_upload_success_public"));
-            router.push("/");
-        } else {
-            showToast(t("toast_upload_success_pending"), "success");
-            router.push("/artisan/nguyen_van_ba");
+            if (newTree.approved) {
+                showToast(t("toast_upload_success_public"));
+                router.push(`/tree/${newTree.id}`);
+            } else {
+                showToast(t("toast_upload_success_pending"), "success");
+                router.push("/artisan/nguyen_van_ba");
+            }
+        } catch (error) {
+            showToast(error.message || t("toast_upload_image_error"), "error");
         }
     };
 

@@ -3,32 +3,47 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { translations } from "../lib/translations";
 import { getDbState, saveDbState } from "../lib/db";
+import { api } from "../lib/api-client";
 
 // Contexts
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
     // Theme and Language states (Client-side initialized to prevent SSR mismatch)
-    const [theme, setThemeState] = useState("light");
-    const [lang, setLangState] = useState("vi");
+    const [theme, setThemeState] = useState(() => {
+        if (typeof window === "undefined") return "light";
+        return localStorage.getItem("bh_theme") || "light";
+    });
+    const [lang, setLangState] = useState(() => {
+        if (typeof window === "undefined") return "vi";
+        return localStorage.getItem("bh_lang") || "vi";
+    });
     const [db, setDb] = useState({ artisans: {}, trees: [], moderationRequired: false });
     const [mounted, setMounted] = useState(false);
 
-    useEffect(() => {
-        // Run on client mount
-        const storedTheme = localStorage.getItem("bh_theme") || "light";
-        const storedLang = localStorage.getItem("bh_lang") || "vi";
-        
-        setThemeState(storedTheme);
-        setLangState(storedLang);
-        
-        document.documentElement.setAttribute('data-theme', storedTheme);
-        
-        // Load database state
-        const dbState = getDbState();
+    const refreshDb = async () => {
+        const dbState = await api.bootstrap();
         setDb(dbState);
-        
-        setMounted(true);
+        saveDbState(dbState);
+        return dbState;
+    };
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+    }, [theme]);
+
+    useEffect(() => {
+        /* eslint-disable react-hooks/set-state-in-effect */
+        // Load server-backed database state, with the original local seed as a dev fallback.
+        refreshDb()
+            .catch(() => {
+                const dbState = getDbState();
+                setDb(dbState);
+            })
+            .finally(() => {
+                setMounted(true);
+            });
+        /* eslint-enable react-hooks/set-state-in-effect */
     }, []);
 
     const setTheme = (newTheme) => {
@@ -82,6 +97,7 @@ export function AppProvider({ children }) {
         setLang,
         db,
         updateDb,
+        refreshDb,
         t,
         localize,
         showToast,

@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      UserRole @default(MEMBER)
+  artisan   Artisan?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Artisan {
+  id        String           @id @default(cuid())
+  userId    String?          @unique
+  slug      String           @unique
+  name      String
+  rank      Json?
+  address   Json?
+  bio       Json?
+  phone     String?
+  zalo      String?
+  avatarUrl String?
+  coverUrl  String?
+  user      User?            @relation(fields: [userId], references: [id])
+  trees     Tree[]
+  guestbook GuestbookEntry[]
+  posts     ArtisanPost[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+model Tree {
+  id        String             @id @default(cuid())
+  ownerId   String
+  title     Json
+  species   Json
+  style     String
+  size      String
+  age       Json?
+  potAge    Json?
+  origin    Json?
+  status    TreeStatus
+  price     Int                @default(0)
+  story     Json?
+  approved  Boolean            @default(false)
+  owner     Artisan            @relation(fields: [ownerId], references: [id])
+  images    TreeImage[]
+  evolution TreeEvolutionStep[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@index([ownerId])
+  @@index([approved, status])
+  @@index([style, size])
+}
+
+model TreeImage {
+  id        String   @id @default(cuid())
+  treeId    String
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
+  tree      Tree     @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model TreeEvolutionStep {
+  id          String @id @default(cuid())
+  treeId      String
+  year        String
+  description Json
+  sortOrder   Int    @default(0)
+  tree        Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+}
+
+model GuestbookEntry {
+  id         String   @id @default(cuid())
+  artisanId String
+  authorName String
+  contact    String?
+  content    String
+  approved   Boolean  @default(true)
+  artisan    Artisan  @relation(fields: [artisanId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+}
+
+model ArtisanPost {
+  id        String   @id @default(cuid())
+  artisanId String
+  dateLabel String
+  title     Json
+  content   Json
+  mediaUrl  String?
+  artisan   Artisan  @relation(fields: [artisanId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model AppSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+enum UserRole {
+  ADMIN
+  ARTISAN
+  MEMBER
+}
+
+enum TreeStatus {
+  EXHIBIT
+  SALE
+  TRAINING
+}

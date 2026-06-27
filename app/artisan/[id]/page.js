@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useApp } from "../../providers";
+import { api } from "../../../lib/api-client";
 
 export default function ArtisanProfile() {
     const params = useParams();
@@ -43,37 +44,37 @@ export default function ArtisanProfile() {
         return t("status_training");
     };
 
-    const handleGuestbookSubmit = (e) => {
+    const handleGuestbookSubmit = async (e) => {
         e.preventDefault();
         if (!gbName.trim() || !gbContent.trim()) return;
 
-        const today = new Date();
-        const dateStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        try {
+            const newComment = await api.addGuestbook(artisanId, {
+                name: gbName.trim(),
+                contact: gbTitle.trim(),
+                content: gbContent.trim(),
+            });
 
-        const newComment = {
-            name: gbName.trim(),
-            contact: gbTitle.trim(),
-            content: gbContent.trim(),
-            date: dateStr
-        };
+            updateDb(prev => {
+                const nextArtisans = { ...prev.artisans };
+                nextArtisans[artisanId] = {
+                    ...nextArtisans[artisanId],
+                    guestbook: [newComment, ...(nextArtisans[artisanId].guestbook || [])]
+                };
+                return {
+                    ...prev,
+                    artisans: nextArtisans
+                };
+            });
 
-        updateDb(prev => {
-            const nextArtisans = { ...prev.artisans };
-            nextArtisans[artisanId] = {
-                ...nextArtisans[artisanId],
-                guestbook: [newComment, ...(nextArtisans[artisanId].guestbook || [])]
-            };
-            return {
-                ...prev,
-                artisans: nextArtisans
-            };
-        });
-
-        // Reset
-        setGbName("");
-        setGbTitle("");
-        setGbContent("");
-        showToast(t("toast_guestbook_success"));
+            // Reset
+            setGbName("");
+            setGbTitle("");
+            setGbContent("");
+            showToast(t("toast_guestbook_success"));
+        } catch (error) {
+            showToast(error.message || "Unable to save guestbook entry.", "error");
+        }
     };
 
     // Dynamic grid renderer for trees in tab

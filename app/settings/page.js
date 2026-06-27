@@ -1,22 +1,28 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useApp } from "../providers";
+import { api } from "../../lib/api-client";
 
 export default function Settings() {
     const { db, updateDb, t, showToast } = useApp();
 
-    const handleModerationChange = (e) => {
+    const handleModerationChange = async (e) => {
         const checked = e.target.checked;
-        updateDb(prev => ({
-            ...prev,
-            moderationRequired: checked
-        }));
-        
-        showToast(checked ? t("toast_moderation_on") : t("toast_moderation_off"));
+        try {
+            const settings = await api.updateModeration(checked);
+            updateDb(prev => ({
+                ...prev,
+                moderationRequired: settings.moderationRequired
+            }));
+            showToast(checked ? t("toast_moderation_on") : t("toast_moderation_off"));
+        } catch (error) {
+            showToast(error.message || "Unable to update moderation settings.", "error");
+        }
     };
 
-    const handleResetData = () => {
+    const handleResetData = async () => {
         const confirmMsg = t("detail_back") === "Back" 
             ? "Are you sure you want to reset all garden data back to the default template?" 
             : t("detail_back") === "戻る" 
@@ -24,13 +30,19 @@ export default function Settings() {
                 : "Bạn có chắc chắn muốn khôi phục dữ liệu cây cảnh và nghệ nhân về trạng thái mặc định ban đầu?";
                 
         if (confirm(confirmMsg)) {
-            localStorage.clear();
-            showToast(t("toast_reset_success"));
-            
-            // Wait brief moment and reload to trigger default re-population
-            setTimeout(() => {
-                window.location.href = "/";
-            }, 1000);
+            try {
+                const dbState = await api.resetData();
+                localStorage.clear();
+                updateDb(dbState);
+                showToast(t("toast_reset_success"));
+                
+                // Wait brief moment and reload to trigger server re-hydration
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 1000);
+            } catch (error) {
+                showToast(error.message || "Unable to reset data.", "error");
+            }
         }
     };
 
@@ -57,6 +69,20 @@ export default function Settings() {
                         />
                         <span className="slider-round"></span>
                     </label>
+                </div>
+            </div>
+
+            {/* Admin Moderation */}
+            <div className="form-section-card">
+                <h3>{t("admin_moderation_title")}</h3>
+                <div className="setting-action-row">
+                    <div className="setting-text">
+                        <strong>{t("admin_pending_queue")}</strong>
+                        <p>{t("admin_moderation_subtitle")}</p>
+                    </div>
+                    <Link className="btn-primary" href="/admin/moderation">
+                        <i className="fa-solid fa-shield-halved"></i> {t("nav_admin")}
+                    </Link>
                 </div>
             </div>
 
