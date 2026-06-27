@@ -1,21 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "../providers";
 import { api } from "../../lib/api-client";
 
-const MOCK_BONSAI_PHOTOS = [
-    "https://images.unsplash.com/photo-1599598177991-ec67b5c37318?w=800&q=80",
-    "https://images.unsplash.com/photo-1627347902083-edbcaa5c4286?w=800&q=80",
-    "https://images.unsplash.com/photo-1641412722397-3be359096577?w=800&q=80",
-    "https://images.unsplash.com/photo-1561641250-c06551cf3b02?w=800&q=80",
-    "https://images.unsplash.com/photo-1683491175728-5921087a95ac?w=800&q=80"
-];
-
 export default function UploadTree() {
     const router = useRouter();
     const { updateDb, t, showToast } = useApp();
+    const fileInputRef = useRef(null);
 
     // Form states
     const [title, setTitle] = useState("");
@@ -35,20 +28,31 @@ export default function UploadTree() {
 
     // Simulated images selected
     const [selectedImages, setSelectedImages] = useState([]);
+    const [uploadingImage, setUploadingImage] = useState(false);
 
-    const simulateImageUpload = () => {
+    const openImagePicker = () => {
         if (selectedImages.length >= 5) {
             showToast(t("toast_upload_image_error") === "Please click the image upload box to attach at least 1 mockup photo!" ? "Maximum 5 photos allowed!" : "Bạn chỉ được chọn tối đa 5 ảnh!", "error");
             return;
         }
-        
-        const nextImgUrl = MOCK_BONSAI_PHOTOS[selectedImages.length % MOCK_BONSAI_PHOTOS.length];
-        setSelectedImages(prev => [...prev, nextImgUrl]);
-        showToast(
-            t("toast_upload_image_error") === "Please click the image upload box to attach at least 1 mockup photo!" 
-                ? `Attached photo #${selectedImages.length + 1}`
-                : `Đã đính kèm ảnh chụp góc cây số ${selectedImages.length + 1}`
-        );
+        fileInputRef.current?.click();
+    };
+
+    const handleImageSelected = async (event) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        if (!file) return;
+
+        setUploadingImage(true);
+        try {
+            const uploaded = await api.uploadImage(file);
+            setSelectedImages(prev => [...prev, uploaded.url]);
+            showToast(`Đã tải ảnh ${selectedImages.length + 1}/5`);
+        } catch (error) {
+            showToast(error.message || "Không thể tải ảnh lên.", "error");
+        } finally {
+            setUploadingImage(false);
+        }
     };
 
     const addTimelineRow = () => {
@@ -240,11 +244,18 @@ export default function UploadTree() {
                     <h3>{t("upload_section_media")}</h3>
                     <div className="form-group-full">
                         <label>{t("detail_timeline_title")} (Tối đa 5 ảnh) <span className="required">*</span></label>
-                        <div className="image-upload-simulation" onClick={simulateImageUpload}>
+                        <div className="image-upload-simulation" onClick={openImagePicker}>
                             <i className="fa-solid fa-images upload-box-icon"></i>
-                            <p>{t("upload_media_box")}</p>
-                            <span className="upload-tip">{t("upload_media_tip")}</span>
+                            <p>{uploadingImage ? "Đang tải ảnh..." : "Click để chọn ảnh từ máy"}</p>
+                            <span className="upload-tip">Ảnh được lưu vào public/uploads trong môi trường local. Tối đa 5 ảnh, mỗi ảnh tối đa 5MB.</span>
                         </div>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageSelected}
+                            style={{ display: "none" }}
+                        />
                         <div className="uploaded-previews-list">
                             {selectedImages.map((imgUrl, idx) => (
                                 <img key={idx} src={imgUrl} className="preview-thumbnail" alt="Preview" />

@@ -25,6 +25,7 @@
 *.pem
 .codegraph/
 .data/
+/public/uploads/
 
 # debug
 npm-debug.log*
