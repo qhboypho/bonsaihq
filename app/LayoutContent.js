@@ -10,6 +10,15 @@ export default function LayoutContent({ children }) {
     const { theme, setTheme, lang, setLang, t, mounted, currentUser, logout, showToast } = useApp();
     const uploadHref = currentUser ? "/upload" : "/login?next=/upload";
     const gardenHref = currentUser?.artisanId ? `/artisan/${currentUser.artisanId}` : "";
+    const isRegisterPage = pathname === "/register";
+    const isLoginPage = pathname === "/login";
+    const isAuthPage = isRegisterPage || isLoginPage;
+    const accountHref = gardenHref || "/";
+    const authNavHref = isRegisterPage ? "/register" : "/login";
+    const authNavIcon = isRegisterPage ? "fa-user-plus" : "fa-user-lock";
+    const authNavLabel = isRegisterPage
+        ? (lang === "vi" ? "Đăng ký" : lang === "en" ? "Register" : "登録")
+        : (lang === "vi" ? "Đăng nhập" : lang === "en" ? "Login" : "ログイン");
 
     // Prevent hydration pop-ins before mounting
     if (!mounted) {
@@ -130,7 +139,7 @@ export default function LayoutContent({ children }) {
             </main>
 
             {/* Bottom Nav (Mobile Only) */}
-            <nav className="mobile-nav">
+            {!isAuthPage && <nav className="mobile-nav">
                 <Link href="/" className={`mobile-nav-link ${isLinkActive("/") && !pathname.includes("upload") && !pathname.includes("settings") && !pathname.includes("artisan") && !pathname.includes("admin") ? "active" : ""}`}>
                     <i className="fa-solid fa-house"></i>
                     <span>{lang === "vi" ? "Sảnh" : lang === "en" ? "Hall" : "本館"}</span>
@@ -156,13 +165,18 @@ export default function LayoutContent({ children }) {
                         <i className="fa-solid fa-shield-halved"></i>
                         <span>{lang === "vi" ? "Duyệt" : lang === "en" ? "Review" : "審査"}</span>
                     </Link>
+                ) : currentUser ? (
+                    <Link href={accountHref} className={`mobile-nav-link ${gardenHref && pathname === gardenHref ? "active" : ""}`}>
+                        <i className="fa-solid fa-user"></i>
+                        <span>{lang === "vi" ? "Tài khoản" : lang === "en" ? "Account" : "アカウント"}</span>
+                    </Link>
                 ) : (
-                    <Link href="/login" className={`mobile-nav-link ${isLinkActive("/login") || isLinkActive("/register") ? "active" : ""}`}>
-                        <i className="fa-solid fa-user-lock"></i>
-                        <span>{currentUser ? "Tài khoản" : "Login"}</span>
+                    <Link href={authNavHref} className={`mobile-nav-link ${isLoginPage || isRegisterPage ? "active" : ""}`}>
+                        <i className={`fa-solid ${authNavIcon}`}></i>
+                        <span>{authNavLabel}</span>
                     </Link>
                 )}
-            </nav>
+            </nav>}
         </div>
     );
 }

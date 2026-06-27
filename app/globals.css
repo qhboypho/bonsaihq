@@ -1226,6 +1226,14 @@ body::before {
     box-shadow: 0 0 8px rgba(197, 155, 39, 0.15);
 }
 
+.form-grid input:-webkit-autofill,
+.form-grid input:-webkit-autofill:hover,
+.form-grid input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text-primary);
+    box-shadow: 0 0 0 1000px var(--bg-primary) inset;
+    transition: background-color 9999s ease-out;
+}
+
 .comments-list {
     display: flex;
     flex-direction: column;
@@ -2065,7 +2073,7 @@ body::before {
         display: flex;
     }
     .main-content {
-        margin-top: 65px;
+        margin-top: 58px;
         padding: 16px 16px 85px 16px;
     }
     .hero-banner {
@@ -2152,12 +2160,37 @@ body::before {
         font-size: 0.72rem;
     }
     .header-content {
-        padding: 8px 16px;
+        min-height: 58px;
+        padding: 7px 16px;
+        gap: 8px;
+    }
+    .header-actions {
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    .logo-area {
+        min-width: 0;
+        gap: 8px;
+    }
+    .logo-text {
+        min-width: 0;
     }
     .logo-text h1 {
         font-size: 1.15rem;
+        white-space: nowrap;
+    }
+    .logo-text span {
+        display: none;
     }
     .logo-icon {
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+    }
+    .viet-stamp-seal {
+        display: none;
+    }
+    .theme-toggle-btn {
         width: 36px;
         height: 36px;
     }
