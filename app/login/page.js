@@ -11,7 +11,7 @@ function LoginForm() {
     const searchParams = useSearchParams();
     const { showToast, refreshSession } = useApp();
     const [username, setUsername] = useState("admin");
-    const [password, setPassword] = useState("admin123");
+    const [password, setPassword] = useState("");
     const [submitting, setSubmitting] = useState(false);
 
     const handleSubmit = async (event) => {
@@ -40,11 +40,11 @@ function LoginForm() {
                 <div className="form-grid">
                     <div className="form-group-full">
                         <label>Tên đăng nhập</label>
-                        <input value={username} onChange={(e) => setUsername(e.target.value)} required />
+                        <input name="username" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
                     </div>
                     <div className="form-group-full">
                         <label>Mật khẩu</label>
-                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        <input name="current-password" autoComplete="current-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                     </div>
                 </div>
                 <div className="form-submit-row">

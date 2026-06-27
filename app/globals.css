@@ -318,6 +318,52 @@ body::before {
     border-color: var(--color-accent);
 }
 
+.auth-links a.active {
+    color: var(--bg-primary);
+    background: var(--color-primary);
+    border-color: var(--color-accent);
+    cursor: default;
+    pointer-events: none;
+}
+
+.auth-home-link {
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    background: rgba(var(--color-primary-rgb), 0.03);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.auth-home-link i {
+    color: var(--color-accent);
+}
+
+.auth-home-link:hover {
+    color: var(--color-primary);
+    border-color: var(--color-accent);
+    background: var(--bg-card);
+}
+
+.auth-layout-mode .header-content {
+    max-width: 1120px;
+}
+
+.auth-layout-mode .main-content {
+    padding-top: 34px;
+}
+
+.auth-layout-mode .viet-stamp-seal {
+    display: none;
+}
+
 /* Language Switcher */
 .lang-switcher {
     display: flex;
@@ -1568,6 +1614,10 @@ body::before {
     margin: 0 auto;
 }
 
+.auth-page-shell .form-section-card {
+    border-radius: 8px;
+}
+
 .admin-page-shell {
     width: 100%;
     max-width: 1240px;
@@ -2099,6 +2149,31 @@ body::before {
     }
     .auth-links {
         display: none;
+    }
+    .auth-layout-mode .auth-links {
+        display: flex;
+    }
+    .auth-layout-mode .auth-home-link span {
+        display: none;
+    }
+    .auth-layout-mode .auth-home-link {
+        width: 38px;
+        padding: 0;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    .auth-layout-mode .header-actions {
+        gap: 8px;
+    }
+    .auth-layout-mode .logo-text span {
+        display: none;
+    }
+    .auth-layout-mode .auth-links a {
+        padding: 0 10px;
+        font-size: 0.8rem;
+    }
+    .auth-layout-mode .main-content {
+        padding-bottom: 28px;
     }
     .session-chip {
         max-width: 120px;

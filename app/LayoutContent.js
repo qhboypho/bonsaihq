@@ -8,6 +8,7 @@ import { useApp } from "./providers";
 export default function LayoutContent({ children }) {
     const pathname = usePathname();
     const { theme, setTheme, lang, setLang, t, mounted, currentUser, logout, showToast } = useApp();
+    const isAuthPage = pathname === "/login" || pathname === "/register";
 
     // Prevent hydration pop-ins before mounting
     if (!mounted) {
@@ -38,7 +39,7 @@ export default function LayoutContent({ children }) {
     };
 
     return (
-        <div className="layout-wrapper">
+        <div className={`layout-wrapper ${isAuthPage ? "auth-layout-mode" : ""}`}>
             {/* Header Area */}
             <header className="main-header">
                 <div className="header-content">
@@ -56,6 +57,7 @@ export default function LayoutContent({ children }) {
                         </div>
                     </Link>
 
+                    {!isAuthPage && (
                     <nav className="desktop-nav">
                         <Link href="/" className={`nav-link ${isLinkActive("/") && !pathname.includes("upload") && !pathname.includes("settings") && !pathname.includes("artisan") && !pathname.includes("admin") ? "active" : ""}`}>
                             <i className="fa-solid fa-house"></i> {t("nav_home")}
@@ -70,8 +72,16 @@ export default function LayoutContent({ children }) {
                             <i className="fa-solid fa-sliders"></i> {t("nav_settings")}
                         </Link>
                     </nav>
+                    )}
 
                     <div className="header-actions">
+                        {isAuthPage && (
+                            <Link href="/" className="auth-home-link">
+                                <i className="fa-solid fa-house"></i>
+                                <span>Về sảnh</span>
+                            </Link>
+                        )}
+
                         {currentUser?.role === "ADMIN" && (
                             <Link
                                 href="/admin/moderation"
@@ -93,8 +103,8 @@ export default function LayoutContent({ children }) {
                             </div>
                         ) : (
                             <div className="auth-links">
-                                <Link href="/login">Đăng nhập</Link>
-                                <Link href="/register">Đăng ký</Link>
+                                <Link href="/login" className={pathname === "/login" ? "active" : ""}>Đăng nhập</Link>
+                                <Link href="/register" className={pathname === "/register" ? "active" : ""}>Đăng ký</Link>
                             </div>
                         )}
 
@@ -124,6 +134,7 @@ export default function LayoutContent({ children }) {
             </main>
 
             {/* Bottom Nav (Mobile Only) */}
+            {!isAuthPage && (
             <nav className="mobile-nav">
                 <Link href="/" className={`mobile-nav-link ${isLinkActive("/") && !pathname.includes("upload") && !pathname.includes("settings") && !pathname.includes("artisan") && !pathname.includes("admin") ? "active" : ""}`}>
                     <i className="fa-solid fa-house"></i>
@@ -153,6 +164,7 @@ export default function LayoutContent({ children }) {
                     </Link>
                 )}
             </nav>
+            )}
         </div>
     );
 }
