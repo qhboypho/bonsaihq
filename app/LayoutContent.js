@@ -148,12 +148,10 @@ export default function LayoutContent({ children }) {
                     <i className="fa-solid fa-circle-plus"></i>
                     <span>{lang === "vi" ? "Đăng cây" : lang === "en" ? "Publish" : "登録"}</span>
                 </Link>
-                {gardenHref && (
-                    <Link href={gardenHref} className={`mobile-nav-link ${pathname === gardenHref ? "active" : ""}`}>
-                        <i className="fa-solid fa-seedling"></i>
-                        <span>{lang === "vi" ? "Nhà vườn" : lang === "en" ? "Garden" : "庭園"}</span>
-                    </Link>
-                )}
+                <Link href="/artisans" className={`mobile-nav-link ${isLinkActive("/artisans") ? "active" : ""}`}>
+                    <i className="fa-solid fa-seedling"></i>
+                    <span>{lang === "vi" ? "Nhà vườn" : lang === "en" ? "Garden" : "庭園"}</span>
+                </Link>
                 {currentUser?.role === "ADMIN" && (
                     <Link href="/settings" className={`mobile-nav-link ${isLinkActive("/settings") ? "active" : ""}`}>
                         <i className="fa-solid fa-sliders"></i>
@@ -168,7 +166,7 @@ export default function LayoutContent({ children }) {
                 ) : currentUser ? (
                     <Link href={accountHref} className={`mobile-nav-link ${gardenHref && pathname === gardenHref ? "active" : ""}`}>
                         <i className="fa-solid fa-user"></i>
-                        <span>{lang === "vi" ? "Tài khoản" : lang === "en" ? "Account" : "アカウント"}</span>
+                        <span>{lang === "vi" ? "Tôi" : lang === "en" ? "Me" : "私"}</span>
                     </Link>
                 ) : (
                     <Link href={authNavHref} className={`mobile-nav-link ${isLoginPage || isRegisterPage ? "active" : ""}`}>

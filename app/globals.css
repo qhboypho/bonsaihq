@@ -2149,11 +2149,12 @@ body::before {
         display: none;
     }
     .session-chip {
-        max-width: 120px;
-        padding-left: 8px;
+        width: 38px;
+        padding: 3px;
+        justify-content: center;
     }
     .session-name {
-        max-width: 70px;
+        display: none;
     }
     .lang-btn {
         padding: 2px 4px;
