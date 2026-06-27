@@ -57,12 +57,12 @@ export default function RegisterPage() {
                         <input value={form.username} onChange={(e) => updateField("username", e.target.value)} required placeholder="vd: vuon_sanh_ba" />
                     </div>
                     <div className="form-group-full">
-                        <label>Email <span className="form-help-text">(không bắt buộc)</span></label>
-                        <input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} />
-                    </div>
-                    <div className="form-group-full">
                         <label>Mật khẩu <span className="required">*</span></label>
                         <input type="password" minLength={6} value={form.password} onChange={(e) => updateField("password", e.target.value)} required />
+                    </div>
+                    <div className="form-group-full">
+                        <label>Email <span className="form-help-text">(không bắt buộc)</span></label>
+                        <input type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} />
                     </div>
                     <div className="form-group">
                         <label>Điện thoại/Zalo</label>
