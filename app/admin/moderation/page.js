@@ -71,6 +71,11 @@ export default function ModerationPage() {
             <div className="form-header">
                 <h2>{t("admin_moderation_title") || "Quản Lý Cây"}</h2>
                 <p>{t("admin_moderation_subtitle") || "Quản lý bài đăng cây cảnh, trạng thái hiển thị và hàng chờ duyệt."}</p>
+                <div style={{ marginTop: "16px", display: "flex", justifyContent: "center", gap: "12px", flexWrap: "wrap" }}>
+                    <Link className="btn-secondary" href="/admin/artisans">
+                        <i className="fa-solid fa-user-pen"></i> Quản lý nghệ nhân
+                    </Link>
+                </div>
             </div>
 
             <div className="form-section-card">

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { rm } from "node:fs/promises";
 import path from "node:path";
-import { addGuestbookEntry, getArtisanById } from "../../lib/server/repositories/artisans";
+import { addGuestbookEntry, deleteArtisan, getArtisanById, saveArtisan } from "../../lib/server/repositories/artisans";
 import { getSettings, updateModerationRequired } from "../../lib/server/repositories/settings";
 import { createTree, listTrees, updateTreeApproval } from "../../lib/server/repositories/trees";
 
@@ -61,5 +61,25 @@ describe("server repositories", () => {
 
         expect(entry.name).toBe("Visitor");
         expect(artisan.guestbook[0].content).toBe("Great garden.");
+    });
+
+    it("creates and deletes artisans without owned trees", async () => {
+        const artisan = await saveArtisan({
+            id: "test_artisan",
+            name: "Test Artisan",
+            rank: { vi: "Nghệ nhân thử nghiệm", en: "Test artisan", jp: "テスト" },
+            address: { vi: "Việt Nam", en: "Vietnam", jp: "ベトナム" },
+            bio: { vi: "Bio", en: "Bio", jp: "Bio" },
+            avatar: "https://example.com/avatar.jpg",
+            cover: "https://example.com/cover.jpg",
+            phone: "0900000000",
+            zalo: "https://zalo.me/0900000000",
+            guestbook: [],
+            blog: [],
+        });
+
+        expect(artisan.name).toBe("Test Artisan");
+        expect(await deleteArtisan("test_artisan")).toBe(true);
+        expect(await getArtisanById("test_artisan")).toBeNull();
     });
 });
