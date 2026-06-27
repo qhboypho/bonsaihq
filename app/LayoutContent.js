@@ -72,6 +72,14 @@ export default function LayoutContent({ children }) {
                             <i className="fa-solid fa-shield-halved"></i>
                             <span>{t("nav_admin") || "Quản trị"}</span>
                         </Link>
+                        <Link
+                            href="/login"
+                            className="theme-toggle-btn"
+                            title="Đăng nhập"
+                            aria-label="Đăng nhập"
+                        >
+                            <i className="fa-solid fa-user-lock"></i>
+                        </Link>
 
                         {/* Language Switcher */}
                         <div className="lang-switcher">
