@@ -2,11 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useApp } from "../providers";
 import { api } from "../../lib/api-client";
 
 export default function Settings() {
-    const { db, updateDb, t, showToast, currentUser } = useApp();
+    const router = useRouter();
+    const pathname = usePathname();
+    const { db, updateDb, t, showToast, currentUser, mounted } = useApp();
     const [googleForm, setGoogleForm] = useState({
         clientId: "",
         clientSecret: "",
@@ -15,9 +18,17 @@ export default function Settings() {
         configured: false,
     });
     const [savingGoogle, setSavingGoogle] = useState(false);
+    const isAdmin = currentUser?.role === "ADMIN";
 
     useEffect(() => {
-        if (currentUser?.role !== "ADMIN") return;
+        if (!mounted) return;
+        if (!isAdmin) {
+            router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+        }
+    }, [mounted, isAdmin, pathname, router]);
+
+    useEffect(() => {
+        if (!isAdmin) return;
         let active = true;
         api.getGoogleSettings()
             .then((settings) => {
@@ -37,7 +48,7 @@ export default function Settings() {
             active = false;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentUser?.role]);
+    }, [isAdmin]);
 
     const handleModerationChange = async (e) => {
         const checked = e.target.checked;
@@ -105,6 +116,17 @@ export default function Settings() {
         }
     };
 
+    if (!mounted || !isAdmin) {
+        return (
+            <div className="form-container">
+                <div className="form-section-card auth-redirect-card">
+                    <i className="fa-solid fa-shield-halved"></i>
+                    <p>Đang chuyển tới trang đăng nhập quản trị...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="form-container">
             <div className="form-header">
@@ -131,61 +153,57 @@ export default function Settings() {
                 </div>
             </div>
 
-            {currentUser?.role === "ADMIN" && (
-                <form className="form-section-card" onSubmit={handleGoogleSubmit}>
-                    <h3>Google OAuth</h3>
-                    <div className="setting-action-row oauth-status-row">
-                        <div className="setting-text">
-                            <strong>{googleForm.configured ? "Google login đang bật" : "Google login chưa cấu hình đủ"}</strong>
-                            <p>Lưu Client ID, Client Secret và Redirect URI vào server store để không bị mất sau khi refresh/restart.</p>
-                        </div>
-                        <span className={`status-pill ${googleForm.configured ? "public" : "pending"}`}>
-                            {googleForm.configured ? "Ready" : "Missing"}
-                        </span>
+            <form className="form-section-card" onSubmit={handleGoogleSubmit}>
+                <h3>Google OAuth</h3>
+                <div className="setting-action-row oauth-status-row">
+                    <div className="setting-text">
+                        <strong>{googleForm.configured ? "Google login đang bật" : "Google login chưa cấu hình đủ"}</strong>
+                        <p>Lưu Client ID, Client Secret và Redirect URI vào server store để không bị mất sau khi refresh/restart.</p>
                     </div>
-                    <div className="form-grid">
-                        <div className="form-group-full">
-                            <label>Google Client ID</label>
-                            <input value={googleForm.clientId} onChange={(e) => updateGoogleField("clientId", e.target.value)} placeholder="...apps.googleusercontent.com" />
-                        </div>
-                        <div className="form-group-full">
-                            <label>Google Client Secret</label>
-                            <input
-                                type="password"
-                                value={googleForm.clientSecret}
-                                onChange={(e) => updateGoogleField("clientSecret", e.target.value)}
-                                placeholder={googleForm.hasClientSecret ? "Đã lưu. Nhập mới nếu muốn thay đổi." : "Nhập client secret"}
-                            />
-                        </div>
-                        <div className="form-group-full">
-                            <label>Redirect URI</label>
-                            <input value={googleForm.redirectUri} onChange={(e) => updateGoogleField("redirectUri", e.target.value)} placeholder="http://localhost:3000/api/auth/callback" />
-                            <span className="form-help-text">Để trống thì hệ thống tự dùng /api/auth/callback theo domain hiện tại.</span>
-                        </div>
+                    <span className={`status-pill ${googleForm.configured ? "public" : "pending"}`}>
+                        {googleForm.configured ? "Ready" : "Missing"}
+                    </span>
+                </div>
+                <div className="form-grid">
+                    <div className="form-group-full">
+                        <label>Google Client ID</label>
+                        <input value={googleForm.clientId} onChange={(e) => updateGoogleField("clientId", e.target.value)} placeholder="...apps.googleusercontent.com" />
                     </div>
-                    <div className="form-submit-row">
-                        <button className="btn-primary" type="submit" disabled={savingGoogle}>
-                            <i className="fa-solid fa-floppy-disk"></i> Lưu Google OAuth
-                        </button>
+                    <div className="form-group-full">
+                        <label>Google Client Secret</label>
+                        <input
+                            type="password"
+                            value={googleForm.clientSecret}
+                            onChange={(e) => updateGoogleField("clientSecret", e.target.value)}
+                            placeholder={googleForm.hasClientSecret ? "Đã lưu. Nhập mới nếu muốn thay đổi." : "Nhập client secret"}
+                        />
                     </div>
-                </form>
-            )}
-
-            {/* Admin Moderation */}
-            {currentUser?.role === "ADMIN" && (
-                <div className="form-section-card">
-                    <h3>{t("admin_moderation_title")}</h3>
-                    <div className="setting-action-row">
-                        <div className="setting-text">
-                            <strong>{t("admin_pending_queue")}</strong>
-                            <p>{t("admin_moderation_subtitle")}</p>
-                        </div>
-                        <Link className="btn-primary" href="/admin/moderation">
-                            <i className="fa-solid fa-shield-halved"></i> {t("nav_admin")}
-                        </Link>
+                    <div className="form-group-full">
+                        <label>Redirect URI</label>
+                        <input value={googleForm.redirectUri} onChange={(e) => updateGoogleField("redirectUri", e.target.value)} placeholder="http://localhost:3000/api/auth/callback" />
+                        <span className="form-help-text">Để trống thì hệ thống tự dùng /api/auth/callback theo domain hiện tại.</span>
                     </div>
                 </div>
-            )}
+                <div className="form-submit-row">
+                    <button className="btn-primary" type="submit" disabled={savingGoogle}>
+                        <i className="fa-solid fa-floppy-disk"></i> Lưu Google OAuth
+                    </button>
+                </div>
+            </form>
+
+            {/* Admin Moderation */}
+            <div className="form-section-card">
+                <h3>{t("admin_moderation_title")}</h3>
+                <div className="setting-action-row">
+                    <div className="setting-text">
+                        <strong>{t("admin_pending_queue")}</strong>
+                        <p>{t("admin_moderation_subtitle")}</p>
+                    </div>
+                    <Link className="btn-primary" href="/admin/moderation">
+                        <i className="fa-solid fa-shield-halved"></i> {t("nav_admin")}
+                    </Link>
+                </div>
+            </div>
 
             {/* Reset Data Settings */}
             <div className="form-section-card">

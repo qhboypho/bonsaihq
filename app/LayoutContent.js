@@ -70,9 +70,11 @@ export default function LayoutContent({ children }) {
                                 <i className="fa-solid fa-seedling"></i> {t("nav_my_garden")}
                             </Link>
                         )}
-                        <Link href="/settings" className={`nav-link ${isLinkActive("/settings") ? "active" : ""}`}>
-                            <i className="fa-solid fa-sliders"></i> {t("nav_settings")}
-                        </Link>
+                        {currentUser?.role === "ADMIN" && (
+                            <Link href="/settings" className={`nav-link ${isLinkActive("/settings") ? "active" : ""}`}>
+                                <i className="fa-solid fa-sliders"></i> {t("nav_settings")}
+                            </Link>
+                        )}
                     </nav>
 
                     <div className="header-actions">
@@ -143,10 +145,12 @@ export default function LayoutContent({ children }) {
                         <span>{lang === "vi" ? "Nhà vườn" : lang === "en" ? "Garden" : "庭園"}</span>
                     </Link>
                 )}
-                <Link href="/settings" className={`mobile-nav-link ${isLinkActive("/settings") ? "active" : ""}`}>
-                    <i className="fa-solid fa-sliders"></i>
-                    <span>{lang === "vi" ? "Cài đặt" : lang === "en" ? "Settings" : "設定"}</span>
-                </Link>
+                {currentUser?.role === "ADMIN" && (
+                    <Link href="/settings" className={`mobile-nav-link ${isLinkActive("/settings") ? "active" : ""}`}>
+                        <i className="fa-solid fa-sliders"></i>
+                        <span>{lang === "vi" ? "Cài đặt" : lang === "en" ? "Settings" : "設定"}</span>
+                    </Link>
+                )}
                 {currentUser?.role === "ADMIN" ? (
                     <Link href="/admin/moderation" className={`mobile-nav-link ${isLinkActive("/admin") ? "active" : ""}`}>
                         <i className="fa-solid fa-shield-halved"></i>
