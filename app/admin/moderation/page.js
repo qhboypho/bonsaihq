@@ -2,15 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { api } from "../../../lib/api-client";
 import { useApp } from "../../providers";
 
 export default function ModerationPage() {
-    const { t, localize, showToast } = useApp();
+    const router = useRouter();
+    const pathname = usePathname();
+    const { t, localize, showToast, mounted, currentUser } = useApp();
     const [trees, setTrees] = useState([]);
     const [filter, setFilter] = useState("all");
     const [loading, setLoading] = useState(true);
     const [busyId, setBusyId] = useState("");
+    const isAdmin = currentUser?.role === "ADMIN";
 
     const loadTrees = async () => {
         setLoading(true);
@@ -25,11 +29,19 @@ export default function ModerationPage() {
     };
 
     useEffect(() => {
+        if (!mounted) return;
+        if (!isAdmin) {
+            router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+        }
+    }, [mounted, isAdmin, pathname, router]);
+
+    useEffect(() => {
+        if (!isAdmin) return;
         /* eslint-disable react-hooks/set-state-in-effect */
         loadTrees();
         /* eslint-enable react-hooks/set-state-in-effect */
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [isAdmin]);
 
     const handleApproval = async (treeId, approved) => {
         setBusyId(treeId);
@@ -65,6 +77,17 @@ export default function ModerationPage() {
         if (filter === "public") return tree.approved;
         return true;
     });
+
+    if (!mounted || !isAdmin) {
+        return (
+            <div className="admin-page-shell">
+                <div className="form-section-card auth-redirect-card">
+                    <i className="fa-solid fa-shield-halved"></i>
+                    <p>Đang chuyển tới trang đăng nhập quản trị...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="admin-page-shell">

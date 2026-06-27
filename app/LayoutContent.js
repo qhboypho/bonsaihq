@@ -9,6 +9,8 @@ export default function LayoutContent({ children }) {
     const pathname = usePathname();
     const { theme, setTheme, lang, setLang, t, mounted, currentUser, logout, showToast } = useApp();
     const isAuthPage = pathname === "/login" || pathname === "/register";
+    const uploadHref = currentUser ? "/upload" : "/login?next=/upload";
+    const gardenHref = currentUser?.artisanId ? `/artisan/${currentUser.artisanId}` : "";
 
     // Prevent hydration pop-ins before mounting
     if (!mounted) {
@@ -62,12 +64,14 @@ export default function LayoutContent({ children }) {
                         <Link href="/" className={`nav-link ${isLinkActive("/") && !pathname.includes("upload") && !pathname.includes("settings") && !pathname.includes("artisan") && !pathname.includes("admin") ? "active" : ""}`}>
                             <i className="fa-solid fa-house"></i> {t("nav_home")}
                         </Link>
-                        <Link href="/upload" className={`nav-link ${isLinkActive("/upload") ? "active" : ""}`}>
+                        <Link href={uploadHref} className={`nav-link ${isLinkActive("/upload") ? "active" : ""}`}>
                             <i className="fa-solid fa-circle-plus"></i> {t("nav_upload")}
                         </Link>
-                        <Link href="/artisan/nguyen_van_ba" className={`nav-link ${pathname.includes("artisan/nguyen_van_ba") ? "active" : ""}`}>
-                            <i className="fa-solid fa-seedling"></i> {t("nav_my_garden")}
-                        </Link>
+                        {gardenHref && (
+                            <Link href={gardenHref} className={`nav-link ${pathname === gardenHref ? "active" : ""}`}>
+                                <i className="fa-solid fa-seedling"></i> {t("nav_my_garden")}
+                            </Link>
+                        )}
                         <Link href="/settings" className={`nav-link ${isLinkActive("/settings") ? "active" : ""}`}>
                             <i className="fa-solid fa-sliders"></i> {t("nav_settings")}
                         </Link>
@@ -140,14 +144,16 @@ export default function LayoutContent({ children }) {
                     <i className="fa-solid fa-house"></i>
                     <span>{lang === "vi" ? "Sảnh" : lang === "en" ? "Hall" : "本館"}</span>
                 </Link>
-                <Link href="/upload" className={`mobile-nav-link ${isLinkActive("/upload") ? "active" : ""}`}>
+                <Link href={uploadHref} className={`mobile-nav-link ${isLinkActive("/upload") ? "active" : ""}`}>
                     <i className="fa-solid fa-circle-plus"></i>
                     <span>{lang === "vi" ? "Đăng cây" : lang === "en" ? "Publish" : "登録"}</span>
                 </Link>
-                <Link href="/artisan/nguyen_van_ba" className={`mobile-nav-link ${pathname.includes("artisan/nguyen_van_ba") ? "active" : ""}`}>
-                    <i className="fa-solid fa-seedling"></i>
-                    <span>{lang === "vi" ? "Nhà vườn" : lang === "en" ? "Garden" : "庭園"}</span>
-                </Link>
+                {gardenHref && (
+                    <Link href={gardenHref} className={`mobile-nav-link ${pathname === gardenHref ? "active" : ""}`}>
+                        <i className="fa-solid fa-seedling"></i>
+                        <span>{lang === "vi" ? "Nhà vườn" : lang === "en" ? "Garden" : "庭園"}</span>
+                    </Link>
+                )}
                 <Link href="/settings" className={`mobile-nav-link ${isLinkActive("/settings") ? "active" : ""}`}>
                     <i className="fa-solid fa-sliders"></i>
                     <span>{lang === "vi" ? "Cài đặt" : lang === "en" ? "Settings" : "設定"}</span>

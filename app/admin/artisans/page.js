@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { api } from "../../../lib/api-client";
 import { useApp } from "../../providers";
 
@@ -20,12 +21,15 @@ const emptyForm = {
 };
 
 export default function AdminArtisansPage() {
-    const { t, localize, showToast } = useApp();
+    const router = useRouter();
+    const pathname = usePathname();
+    const { t, localize, showToast, mounted, currentUser } = useApp();
     const [artisans, setArtisans] = useState([]);
     const [form, setForm] = useState(emptyForm);
     const [editingId, setEditingId] = useState("");
     const [loading, setLoading] = useState(true);
     const [busyId, setBusyId] = useState("");
+    const isAdmin = currentUser?.role === "ADMIN";
 
     const loadArtisans = async () => {
         setLoading(true);
@@ -39,11 +43,19 @@ export default function AdminArtisansPage() {
     };
 
     useEffect(() => {
+        if (!mounted) return;
+        if (!isAdmin) {
+            router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+        }
+    }, [mounted, isAdmin, pathname, router]);
+
+    useEffect(() => {
+        if (!isAdmin) return;
         /* eslint-disable react-hooks/set-state-in-effect */
         loadArtisans();
         /* eslint-enable react-hooks/set-state-in-effect */
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [isAdmin]);
 
     const updateField = (field, value) => {
         setForm(prev => ({ ...prev, [field]: value }));
@@ -116,6 +128,17 @@ export default function AdminArtisansPage() {
             setBusyId("");
         }
     };
+
+    if (!mounted || !isAdmin) {
+        return (
+            <div className="admin-page-shell">
+                <div className="form-section-card auth-redirect-card">
+                    <i className="fa-solid fa-shield-halved"></i>
+                    <p>Đang chuyển tới trang đăng nhập quản trị...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="admin-page-shell">

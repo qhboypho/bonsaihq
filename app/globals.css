@@ -1787,6 +1787,22 @@ body::before {
     margin-bottom: 16px;
 }
 
+.auth-redirect-card {
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.auth-redirect-card i {
+    color: var(--color-accent);
+    font-size: 2rem;
+}
+
 .image-upload-simulation {
     border: 2.5px dashed var(--border-color);
     border-radius: 8px;
