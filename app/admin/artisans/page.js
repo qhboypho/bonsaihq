@@ -15,6 +15,8 @@ const emptyForm = {
     cover: "",
     phone: "",
     zalo: "",
+    accountUsername: "",
+    accountPassword: "",
 };
 
 export default function AdminArtisansPage() {
@@ -59,6 +61,8 @@ export default function AdminArtisansPage() {
             cover: artisan.cover || "",
             phone: artisan.phone || "",
             zalo: artisan.zalo || "",
+            accountUsername: "",
+            accountPassword: "",
         });
     };
 
@@ -89,7 +93,7 @@ export default function AdminArtisansPage() {
                 return [saved, ...prev];
             });
             resetForm();
-            showToast("Đã lưu nghệ nhân.");
+            showToast(saved.accountCreated ? `Đã lưu nghệ nhân và tạo tài khoản ${saved.accountUsername}.` : "Đã lưu nghệ nhân.");
         } catch (error) {
             showToast(error.message || "Unable to save artisan.", "error");
         } finally {
@@ -165,6 +169,39 @@ export default function AdminArtisansPage() {
                         <label>Cover URL</label>
                         <input value={form.cover} onChange={(e) => updateField("cover", e.target.value)} />
                     </div>
+                    {!editingId && (
+                        <div className="form-group-full admin-account-panel">
+                            <div className="setting-action-row admin-account-panel-head">
+                                <div className="setting-text">
+                                    <strong>Tạo tài khoản đăng nhập nhanh</strong>
+                                    <p>Không bắt buộc. Dùng cho nghệ nhân chưa rành công nghệ, họ có thể đăng nhập rồi tự cập nhật hồ sơ sau.</p>
+                                </div>
+                            </div>
+                            <div className="form-grid">
+                                <div className="form-group">
+                                    <label>Tên đăng nhập</label>
+                                    <input
+                                        name="accountUsername"
+                                        autoComplete="off"
+                                        value={form.accountUsername}
+                                        onChange={(e) => updateField("accountUsername", e.target.value)}
+                                        placeholder="vd: vuon_sanh_ba"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Mật khẩu tạm</label>
+                                    <input
+                                        name="accountPassword"
+                                        autoComplete="new-password"
+                                        type="password"
+                                        value={form.accountPassword}
+                                        onChange={(e) => updateField("accountPassword", e.target.value)}
+                                        placeholder="Tối thiểu 6 ký tự"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <div className="form-submit-row">
                     <button className="btn-primary" disabled={Boolean(busyId)} type="submit">

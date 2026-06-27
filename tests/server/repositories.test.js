@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { rm } from "node:fs/promises";
 import path from "node:path";
 import { addGuestbookEntry, deleteArtisan, getArtisanById, saveArtisan } from "../../lib/server/repositories/artisans";
+import { createArtisanUserAccount } from "../../lib/server/auth";
+import { readStore } from "../../lib/server/store";
 import { getGoogleAuthSettings, getSettings, updateGoogleAuthSettings, updateModerationRequired } from "../../lib/server/repositories/settings";
 import { createTree, listTrees, updateTreeApproval } from "../../lib/server/repositories/trees";
 
@@ -103,5 +105,39 @@ describe("server repositories", () => {
         const reloaded = await getGoogleAuthSettings({ includeSecret: true });
         expect(reloaded.clientSecret).toBe("super-secret");
         expect(reloaded.redirectUri).toBe("http://localhost:3001/api/auth/callback");
+    });
+
+    it("creates quick login accounts for admin-created artisans", async () => {
+        await saveArtisan({
+            id: "quick_login_artisan",
+            name: "Nghệ nhân tài khoản nhanh",
+            rank: { vi: "Nghệ nhân", en: "Artisan", jp: "職人" },
+            address: { vi: "Việt Nam", en: "Vietnam", jp: "ベトナム" },
+            bio: { vi: "Bio", en: "Bio", jp: "Bio" },
+            avatar: "https://example.com/avatar.jpg",
+            cover: "https://example.com/cover.jpg",
+            phone: "",
+            zalo: "",
+            guestbook: [],
+            blog: [],
+        });
+
+        const account = await createArtisanUserAccount({
+            name: "Nghệ nhân tài khoản nhanh",
+            username: "quick_artisan",
+            password: "secret123",
+            artisanId: "quick_login_artisan",
+        });
+        const duplicate = await createArtisanUserAccount({
+            name: "Trùng tài khoản",
+            username: "quick_artisan",
+            password: "secret123",
+            artisanId: "quick_login_artisan",
+        });
+        const db = await readStore();
+
+        expect(account.username).toBe("quick_artisan");
+        expect(db.users.some((user) => user.username === "quick_artisan" && user.artisanId === "quick_login_artisan")).toBe(true);
+        expect(duplicate.error).toBe("Tên đăng nhập hoặc email đã tồn tại.");
     });
 });
