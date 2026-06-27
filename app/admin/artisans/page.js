@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { api } from "../../../lib/api-client";
+import { getUserHomePath } from "../../../lib/auth-navigation";
 import { useApp } from "../../providers";
 
 const emptyForm = {
@@ -44,10 +45,14 @@ export default function AdminArtisansPage() {
 
     useEffect(() => {
         if (!mounted) return;
-        if (!isAdmin) {
+        if (!currentUser) {
             router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+            return;
         }
-    }, [mounted, isAdmin, pathname, router]);
+        if (!isAdmin) {
+            router.replace(getUserHomePath(currentUser));
+        }
+    }, [currentUser, mounted, isAdmin, pathname, router]);
 
     useEffect(() => {
         if (!isAdmin) return;

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useApp } from "../providers";
 import { api } from "../../lib/api-client";
+import { getUserHomePath } from "../../lib/auth-navigation";
 
 export default function Settings() {
     const router = useRouter();
@@ -22,10 +23,14 @@ export default function Settings() {
 
     useEffect(() => {
         if (!mounted) return;
-        if (!isAdmin) {
+        if (!currentUser) {
             router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+            return;
         }
-    }, [mounted, isAdmin, pathname, router]);
+        if (!isAdmin) {
+            router.replace(getUserHomePath(currentUser));
+        }
+    }, [currentUser, mounted, isAdmin, pathname, router]);
 
     useEffect(() => {
         if (!isAdmin) return;

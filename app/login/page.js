@@ -1,27 +1,34 @@
 "use client";
 
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "../../lib/api-client";
+import { getSafePostAuthPath } from "../../lib/auth-navigation";
 import { useApp } from "../providers";
 
 function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { showToast, refreshSession } = useApp();
+    const nextPath = searchParams.get("next");
+    const { showToast, refreshSession, currentUser, mounted } = useApp();
     const [username, setUsername] = useState("admin");
     const [password, setPassword] = useState("");
     const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (!mounted || !currentUser) return;
+        router.replace(getSafePostAuthPath(nextPath, currentUser));
+    }, [currentUser, mounted, nextPath, router]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         setSubmitting(true);
         try {
-            await api.login({ username, password });
-            await refreshSession();
-            showToast("Đăng nhập quản trị thành công.");
-            router.push(searchParams.get("next") || "/admin/moderation");
+            const loginUser = await api.login({ username, password });
+            const sessionUser = await refreshSession() || loginUser;
+            showToast("Đăng nhập thành công.");
+            router.replace(getSafePostAuthPath(nextPath, sessionUser));
         } catch (error) {
             showToast(error.message || "Không thể đăng nhập.", "error");
         } finally {

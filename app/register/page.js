@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "../../lib/api-client";
+import { getUserHomePath } from "../../lib/auth-navigation";
 import { useApp } from "../providers";
 
 export default function RegisterPage() {
     const router = useRouter();
-    const { showToast, refreshSession } = useApp();
+    const { showToast, refreshSession, currentUser, mounted } = useApp();
     const [form, setForm] = useState({
         name: "",
         username: "",
@@ -20,6 +21,11 @@ export default function RegisterPage() {
     });
     const [submitting, setSubmitting] = useState(false);
 
+    useEffect(() => {
+        if (!mounted || !currentUser) return;
+        router.replace(getUserHomePath(currentUser));
+    }, [currentUser, mounted, router]);
+
     const updateField = (field, value) => {
         setForm(prev => ({ ...prev, [field]: value }));
     };
@@ -29,9 +35,9 @@ export default function RegisterPage() {
         setSubmitting(true);
         try {
             await api.register(form);
-            await refreshSession();
+            const sessionUser = await refreshSession();
             showToast("Đã tạo tài khoản nghệ nhân.");
-            router.push("/upload");
+            router.replace(sessionUser?.artisanId ? `/artisan/${sessionUser.artisanId}` : "/upload");
         } catch (error) {
             showToast(error.message || "Không thể tạo tài khoản.", "error");
         } finally {
