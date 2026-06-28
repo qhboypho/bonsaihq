@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useApp } from "../providers";
+import { getDisplayAvatar, getNameInitials } from "../../lib/avatar";
 
 export default function ArtisansPage() {
     const { db, t, localize, currentUser } = useApp();
@@ -28,12 +29,19 @@ export default function ArtisansPage() {
                     {artisans.map((artisan) => {
                         const approvedTrees = db.trees.filter((tree) => tree.ownerId === artisan.id && tree.approved);
                         const forSale = approvedTrees.filter((tree) => tree.status === "Đang giao lưu").length;
+                        const artisanAvatar = getDisplayAvatar(artisan.avatar);
 
                         return (
                             <Link href={`/artisan/${artisan.id}`} key={artisan.id} className="artisan-card">
                                 <div className="artisan-card-banner" style={{ backgroundImage: `url('${artisan.cover}')` }}></div>
                                 <div className="artisan-card-content">
-                                    <img src={artisan.avatar} alt={artisan.name} className="artisan-card-avatar" />
+                                    <div className={`artisan-card-avatar ${artisanAvatar ? "has-image" : ""}`}>
+                                        {artisanAvatar ? (
+                                            <img src={artisanAvatar} alt={artisan.name} />
+                                        ) : (
+                                            <span>{getNameInitials(artisan.name)}</span>
+                                        )}
+                                    </div>
                                     <div className="artisan-card-seal viet-stamp-seal">
                                         <span>{t("viet_stamp_seal") || "Nghệ\nNhân"}</span>
                                     </div>

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useApp } from "./providers";
+import { getDisplayAvatar, getNameInitials } from "../lib/avatar";
 
 export default function Home() {
     const { db, t, localize } = useApp();
@@ -109,12 +110,19 @@ export default function Home() {
                     {Object.values(db.artisans).map(artisan => {
                         const totalTrees = db.trees.filter(t => t.ownerId === artisan.id && t.approved).length;
                         const forSale = db.trees.filter(t => t.ownerId === artisan.id && t.status === "Đang giao lưu" && t.approved).length;
+                        const artisanAvatar = getDisplayAvatar(artisan.avatar);
 
                         return (
                             <Link href={`/artisan/${artisan.id}`} key={artisan.id} className="artisan-card">
                                 <div className="artisan-card-banner" style={{ backgroundImage: `url('${artisan.cover}')` }}></div>
                                 <div className="artisan-card-content">
-                                    <img src={artisan.avatar} alt={artisan.name} className="artisan-card-avatar" />
+                                    <div className={`artisan-card-avatar ${artisanAvatar ? "has-image" : ""}`}>
+                                        {artisanAvatar ? (
+                                            <img src={artisanAvatar} alt={artisan.name} />
+                                        ) : (
+                                            <span>{getNameInitials(artisan.name)}</span>
+                                        )}
+                                    </div>
                                     <div className="artisan-card-seal viet-stamp-seal">
                                         <span>{t("viet_stamp_seal") || "Nghệ\nNhân"}</span>
                                     </div>

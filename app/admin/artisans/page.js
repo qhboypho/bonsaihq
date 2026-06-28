@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { api } from "../../../lib/api-client";
 import { getUserHomePath } from "../../../lib/auth-navigation";
+import { getDisplayAvatar, getNameInitials } from "../../../lib/avatar";
 import { useApp } from "../../providers";
 
 const emptyForm = {
@@ -251,27 +252,37 @@ export default function AdminArtisansPage() {
                     <div className="no-results-card">Đang tải nghệ nhân...</div>
                 ) : (
                     <div className="artisans-grid">
-                        {artisans.map(artisan => (
-                            <div className="artisan-card" key={artisan.id}>
-                                <div className="artisan-card-banner" style={{ backgroundImage: `url('${artisan.cover}')` }}></div>
-                                <div className="artisan-card-content">
-                                    <img src={artisan.avatar} alt={artisan.name} className="artisan-card-avatar" />
-                                    <div className="artisan-card-info">
-                                        <span className="artisan-card-rank">{localize(artisan.rank)}</span>
-                                        <h3>{artisan.name}</h3>
-                                        <p className="artisan-card-loc"><i className="fa-solid fa-location-dot"></i> {localize(artisan.address)}</p>
-                                        <div className="contact-buttons-group" style={{ marginTop: "14px" }}>
-                                            <button className="btn-secondary" onClick={() => editArtisan(artisan)}>
-                                                <i className="fa-solid fa-pen"></i> Sửa
-                                            </button>
-                                            <button className="btn-secondary text-danger" disabled={busyId === artisan.id} onClick={() => removeArtisan(artisan.id)}>
-                                                <i className="fa-solid fa-trash"></i> Xóa
-                                            </button>
+                        {artisans.map(artisan => {
+                            const artisanAvatar = getDisplayAvatar(artisan.avatar);
+
+                            return (
+                                <div className="artisan-card" key={artisan.id}>
+                                    <div className="artisan-card-banner" style={{ backgroundImage: `url('${artisan.cover}')` }}></div>
+                                    <div className="artisan-card-content">
+                                        <div className={`artisan-card-avatar ${artisanAvatar ? "has-image" : ""}`}>
+                                            {artisanAvatar ? (
+                                                <img src={artisanAvatar} alt={artisan.name} />
+                                            ) : (
+                                                <span>{getNameInitials(artisan.name)}</span>
+                                            )}
+                                        </div>
+                                        <div className="artisan-card-info">
+                                            <span className="artisan-card-rank">{localize(artisan.rank)}</span>
+                                            <h3>{artisan.name}</h3>
+                                            <p className="artisan-card-loc"><i className="fa-solid fa-location-dot"></i> {localize(artisan.address)}</p>
+                                            <div className="contact-buttons-group" style={{ marginTop: "14px" }}>
+                                                <button className="btn-secondary" onClick={() => editArtisan(artisan)}>
+                                                    <i className="fa-solid fa-pen"></i> Sửa
+                                                </button>
+                                                <button className="btn-secondary text-danger" disabled={busyId === artisan.id} onClick={() => removeArtisan(artisan.id)}>
+                                                    <i className="fa-solid fa-trash"></i> Xóa
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>

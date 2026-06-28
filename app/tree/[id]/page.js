@@ -25,7 +25,8 @@ export default function TreeDetail() {
         );
     }
 
-    const owner = db.artisans[tree.ownerId] || { name: "Ẩn danh nhà vườn", phone: "0912345678" };
+    const owner = db.artisans[tree.ownerId] || { name: "Ẩn danh nhà vườn", phone: "" };
+    const ownerPhoneDigits = String(owner.phone || "").replace(/[^\d+]/g, "");
 
     let statusClass = "training";
     if (tree.status === "Đang giao lưu") statusClass = "sale";
@@ -134,18 +135,20 @@ export default function TreeDetail() {
                     </div>
 
                     {/* Contact Panel */}
-                    <div className="contact-action-box">
-                        <h4>{t("detail_contact_title")}</h4>
-                        <p>{t("detail_contact_tip")}</p>
-                        <div className="contact-buttons-group">
-                            <a href={`tel:${owner.phone.replace(/\./g, '')}`} className="contact-btn phone">
-                                <i className="fa-solid fa-phone"></i> {owner.phone}
-                            </a>
-                            <a href={`https://zalo.me/${owner.phone.replace(/\./g, '')}?text=${getZaloMsg()}`} className="contact-btn zalo" target="_blank" rel="noopener noreferrer">
-                                <i className="fa-brands fa-whatsapp"></i> {t("detail_zalo")}
-                            </a>
+                    {ownerPhoneDigits && (
+                        <div className="contact-action-box">
+                            <h4>{t("detail_contact_title")}</h4>
+                            <p>{t("detail_contact_tip")}</p>
+                            <div className="contact-buttons-group">
+                                <a href={`tel:${ownerPhoneDigits}`} className="contact-btn phone">
+                                    <i className="fa-solid fa-phone"></i> {owner.phone}
+                                </a>
+                                <a href={`https://zalo.me/${ownerPhoneDigits}?text=${getZaloMsg()}`} className="contact-btn zalo" target="_blank" rel="noopener noreferrer">
+                                    <i className="fa-brands fa-whatsapp"></i> {t("detail_zalo")}
+                                </a>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
 

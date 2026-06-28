@@ -4,10 +4,11 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useApp } from "./providers";
+import { getDisplayAvatar, getNameInitials } from "../lib/avatar";
 
 export default function LayoutContent({ children }) {
     const pathname = usePathname();
-    const { theme, setTheme, lang, setLang, t, mounted, currentUser, logout, showToast } = useApp();
+    const { theme, setTheme, lang, t, mounted, currentUser, logout, showToast, db } = useApp();
     const uploadHref = currentUser ? "/upload" : "/login?next=/upload";
     const gardenHref = currentUser?.artisanId ? `/artisan/${currentUser.artisanId}` : "";
     const isRegisterPage = pathname === "/register";
@@ -23,6 +24,10 @@ export default function LayoutContent({ children }) {
     const [mobileMenuClosing, setMobileMenuClosing] = React.useState(false);
     const mobileMenuTimerRef = React.useRef(null);
     const mobileDrawerActive = mobileMenuOpen && !mobileMenuClosing;
+    const currentUserArtisan = currentUser?.artisanId ? db.artisans[currentUser.artisanId] : null;
+    const currentUserName = currentUserArtisan?.name || currentUser?.name || "";
+    const currentUserAvatar = getDisplayAvatar(currentUserArtisan?.avatar || currentUser?.avatar);
+    const currentUserInitials = getNameInitials(currentUserName || "Bonsai Hội Quán");
 
     React.useEffect(() => {
         return () => {
@@ -143,7 +148,14 @@ export default function LayoutContent({ children }) {
 
                         {currentUser ? (
                             <div className="session-chip">
-                                <span className="session-name">{currentUser.name}</span>
+                                <span className={`session-avatar ${currentUserAvatar ? "has-image" : ""}`} aria-hidden="true">
+                                    {currentUserAvatar ? (
+                                        <img src={currentUserAvatar} alt="" />
+                                    ) : (
+                                        currentUserInitials
+                                    )}
+                                </span>
+                                <span className="session-name">{currentUserName}</span>
                                 <button onClick={handleLogout} title="Đăng xuất" aria-label="Đăng xuất">
                                     <i className="fa-solid fa-arrow-right-from-bracket"></i>
                                 </button>
@@ -154,13 +166,6 @@ export default function LayoutContent({ children }) {
                                 <Link href="/register" className={pathname === "/register" ? "active" : ""}>Đăng ký</Link>
                             </div>
                         )}
-
-                        {/* Language Switcher */}
-                        <div className="lang-switcher">
-                            <button className={`lang-btn ${lang === "vi" ? "active" : ""}`} onClick={() => setLang("vi")}>VI</button>
-                            <button className={`lang-btn ${lang === "en" ? "active" : ""}`} onClick={() => setLang("en")}>EN</button>
-                            <button className={`lang-btn ${lang === "jp" ? "active" : ""}`} onClick={() => setLang("jp")}>JP</button>
-                        </div>
 
                         {/* Theme Toggle */}
                         <button className="theme-toggle-btn" id="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
@@ -206,12 +211,16 @@ export default function LayoutContent({ children }) {
                         </div>
 
                         <div className="mobile-menu-user">
-                            <div className="mobile-menu-avatar">
-                                <i className={`fa-solid ${currentUser ? "fa-user" : "fa-compass"}`}></i>
+                            <div className={`mobile-menu-avatar ${currentUserAvatar ? "has-image" : ""}`}>
+                                {currentUserAvatar ? (
+                                    <img src={currentUserAvatar} alt="" />
+                                ) : (
+                                    <span>{currentUserInitials}</span>
+                                )}
                             </div>
                             <div className="mobile-menu-user-copy">
                                 <span>{currentUser ? "Tài khoản" : "Bonsai Hội Quán"}</span>
-                                <strong>{currentUser?.name || "Khách tham quan"}</strong>
+                                <strong>{currentUserName || "Khách tham quan"}</strong>
                             </div>
                             <span className="mobile-menu-role">
                                 {currentUser?.role === "ADMIN" ? "Admin" : currentUser ? "Nghệ nhân" : "Khách"}

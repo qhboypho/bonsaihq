@@ -269,11 +269,33 @@ body::before {
 }
 
 .session-chip {
-    height: 38px;
-    padding: 0 6px 0 12px;
+    min-height: 38px;
+    padding: 4px 6px 4px 5px;
     border: 1px solid var(--border-color);
     border-radius: 999px;
     background: var(--bg-card);
+}
+
+.session-avatar {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--bg-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+}
+
+.session-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .session-name {
@@ -514,6 +536,15 @@ body::before {
     align-items: center;
     justify-content: center;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    overflow: hidden;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+}
+
+.mobile-menu-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .mobile-menu-user-copy {
@@ -975,10 +1006,24 @@ body::before {
     height: 64px;
     border-radius: 50%;
     border: 3px solid var(--bg-card);
+    background: var(--color-primary);
+    color: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 0.96rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     position: absolute;
     top: -38px;
     left: 20px;
+}
+
+.artisan-card-avatar img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 
@@ -1237,13 +1282,71 @@ body::before {
     z-index: 10;
 }
 
-.artisan-avatar-img {
+.artisan-avatar-frame {
     width: 150px;
     height: 150px;
     border-radius: 12px;
     border: 5px solid var(--bg-card);
-    object-fit: cover;
+    background: var(--color-primary);
+    color: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
     box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.artisan-avatar-img,
+.artisan-avatar-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-upload-action {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--color-accent);
+    background: var(--bg-card);
+    color: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+    z-index: 12;
+    transition: all 0.2s ease;
+}
+
+.avatar-upload-action:hover {
+    transform: translateY(-1px);
+    background: var(--color-primary);
+    color: var(--bg-primary);
+}
+
+.avatar-upload-action.loading {
+    pointer-events: none;
+    opacity: 0.75;
+}
+
+.avatar-upload-action span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.avatar-upload-action input {
+    display: none;
 }
 
 .artisan-trien-son {
@@ -2140,6 +2243,7 @@ body::before {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    text-decoration: none;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     box-shadow: 0 4px 10px rgba(var(--color-primary-rgb), 0.15);
 }
@@ -2424,9 +2528,10 @@ body::before {
     .avatar-wrapper {
         margin-top: -65px;
     }
-    .artisan-avatar-img {
+    .artisan-avatar-frame {
         width: 120px;
         height: 120px;
+        font-size: 2rem;
     }
     .artisan-title-row {
         justify-content: center;

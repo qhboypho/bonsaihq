@@ -14,10 +14,7 @@ export function AppProvider({ children }) {
         if (typeof window === "undefined") return "light";
         return localStorage.getItem("bh_theme") || "light";
     });
-    const [lang, setLangState] = useState(() => {
-        if (typeof window === "undefined") return "vi";
-        return localStorage.getItem("bh_lang") || "vi";
-    });
+    const [lang, setLangState] = useState("vi");
     const [db, setDb] = useState({ artisans: {}, trees: [], moderationRequired: false });
     const [currentUser, setCurrentUser] = useState(null);
     const [mounted, setMounted] = useState(false);
@@ -45,6 +42,10 @@ export function AppProvider({ children }) {
     }, [theme]);
 
     useEffect(() => {
+        localStorage.setItem("bh_lang", "vi");
+    }, []);
+
+    useEffect(() => {
         /* eslint-disable react-hooks/set-state-in-effect */
         // Load server-backed database state, with the original local seed as a dev fallback.
         Promise.allSettled([refreshDb(), refreshSession()])
@@ -70,9 +71,9 @@ export function AppProvider({ children }) {
         document.documentElement.setAttribute('data-theme', newTheme);
     };
 
-    const setLang = (newLang) => {
-        setLangState(newLang);
-        localStorage.setItem("bh_lang", newLang);
+    const setLang = () => {
+        setLangState("vi");
+        localStorage.setItem("bh_lang", "vi");
     };
 
     const updateDb = (updater) => {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useApp } from "../../providers";
 import { api } from "../../../lib/api-client";
+import { getDisplayAvatar, getNameInitials } from "../../../lib/avatar";
 
 export default function ArtisanProfile() {
     const params = useParams();
@@ -12,6 +13,7 @@ export default function ArtisanProfile() {
     const { db, updateDb, t, localize, showToast, mounted, refreshDb, currentUser } = useApp();
     const [activeTab, setActiveTab] = useState("all-garden");
     const [refreshingArtisan, setRefreshingArtisan] = useState(false);
+    const [avatarUploading, setAvatarUploading] = useState(false);
     const refreshAttemptedId = useRef("");
 
     // Guestbook form states
@@ -67,6 +69,9 @@ export default function ArtisanProfile() {
     
     const isOwner = currentUser?.role === "ADMIN" || currentUser?.artisanId === artisanId;
     const visibleTrees = isOwner ? allTrees : allTrees.filter(t => t.approved);
+    const displayAvatar = getDisplayAvatar(artisan.avatar);
+    const artisanInitials = getNameInitials(artisan.name);
+    const phoneDigits = String(artisan.phone || "").replace(/[^\d+]/g, "");
 
     const exhibitTrees = visibleTrees.filter(t => t.status === "Trưng bày");
     const saleTrees = visibleTrees.filter(t => t.status === "Đang giao lưu");
@@ -107,6 +112,30 @@ export default function ArtisanProfile() {
             showToast(t("toast_guestbook_success"));
         } catch (error) {
             showToast(error.message || "Unable to save guestbook entry.", "error");
+        }
+    };
+
+    const handleAvatarUpload = async (e) => {
+        const file = e.target.files?.[0];
+        e.target.value = "";
+        if (!file) return;
+
+        setAvatarUploading(true);
+        try {
+            const uploaded = await api.uploadImage(file);
+            const updated = await api.updateArtisan(artisanId, { avatar: uploaded.url });
+            updateDb(prev => ({
+                ...prev,
+                artisans: {
+                    ...prev.artisans,
+                    [artisanId]: updated,
+                },
+            }));
+            showToast("Đã cập nhật ảnh đại diện.");
+        } catch (error) {
+            showToast(error.message || "Không thể cập nhật ảnh đại diện.", "error");
+        } finally {
+            setAvatarUploading(false);
         }
     };
 
@@ -174,7 +203,25 @@ export default function ArtisanProfile() {
                 <div className="profile-cover" style={{ backgroundImage: `url('${artisan.cover}')` }}></div>
                 <div className="profile-info-block">
                     <div className="avatar-wrapper">
-                        <img src={artisan.avatar} alt={artisan.name} className="artisan-avatar-img" />
+                        <div className={`artisan-avatar-frame ${displayAvatar ? "has-image" : ""}`}>
+                            {displayAvatar ? (
+                                <img src={displayAvatar} alt={artisan.name} className="artisan-avatar-img" />
+                            ) : (
+                                <span>{artisanInitials}</span>
+                            )}
+                        </div>
+                        {isOwner && (
+                            <label className={`avatar-upload-action ${avatarUploading ? "loading" : ""}`} title="Đổi ảnh đại diện">
+                                <i className={`fa-solid ${avatarUploading ? "fa-spinner fa-spin" : "fa-camera"}`}></i>
+                                <span>{avatarUploading ? "Đang tải" : "Đổi ảnh"}</span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleAvatarUpload}
+                                    disabled={avatarUploading}
+                                />
+                            </label>
+                        )}
                         <div className="artisan-trien-son">{t("viet_stamp_seal") || "Nghệ\nNhân"}</div>
                     </div>
                     <div className="profile-text-details">
@@ -191,11 +238,13 @@ export default function ArtisanProfile() {
                             <div className="stat-item"><strong>{saleTrees.length}</strong> <span>{t("artisan_sale")}</span></div>
                         </div>
                     </div>
-                    <div className="profile-actions">
-                        <a href={`tel:${String(artisan.phone || "").replace(/\./g, '')}`} className="btn-primary contact-zalo-btn">
-                            <i className="fa-solid fa-phone"></i> {t("artisan_call")}
-                        </a>
-                    </div>
+                    {phoneDigits && (
+                        <div className="profile-actions">
+                            <a href={`tel:${phoneDigits}`} className="btn-primary contact-zalo-btn">
+                                <i className="fa-solid fa-phone"></i> {t("artisan_call")}
+                            </a>
+                        </div>
+                    )}
                 </div>
             </div>
 
