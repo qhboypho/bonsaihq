@@ -1044,23 +1044,39 @@ body::before {
 
 .featured-source-badge {
     display: inline-flex;
+    align-items: center;
+    gap: 5px;
     width: fit-content;
     margin-bottom: 5px;
-    padding: 3px 8px;
-    border: 1px solid var(--border-color);
+    padding: 5px 9px;
+    border: 1px solid rgba(var(--color-primary-rgb), 0.32);
     border-radius: 999px;
-    background: rgba(var(--color-primary-rgb), 0.08);
+    background: rgba(var(--color-primary-rgb), 0.14);
     color: var(--color-primary);
     font-size: 0.66rem;
     font-weight: 900;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.featured-source-badge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.12);
 }
 
 .featured-source-badge.pinned {
     border-color: var(--color-accent);
-    background: rgba(197, 155, 39, 0.16);
+    background: rgba(197, 155, 39, 0.22);
     color: var(--color-accent);
+}
+
+.featured-source-badge.pinned::before {
+    box-shadow: 0 0 0 3px rgba(197, 155, 39, 0.16);
 }
 
 .featured-artisan-copy h3 {
@@ -3202,9 +3218,7 @@ body::before {
         min-width: 120px;
     }
     .section-view-all {
-        order: 3;
-        width: 100%;
-        justify-content: center;
+        display: none;
     }
     .featured-artisan-list {
         grid-template-columns: 1fr;
