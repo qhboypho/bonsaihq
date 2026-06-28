@@ -203,9 +203,6 @@ export default function LayoutContent({ children }) {
                                 <span>Menu</span>
                                 <strong>Hội Quán</strong>
                             </div>
-                            <button type="button" onClick={closeMobileMenu} aria-label="Đóng menu">
-                                <i className="fa-solid fa-arrow-right"></i>
-                            </button>
                         </div>
 
                         <div className="mobile-menu-user">
