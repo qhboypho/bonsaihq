@@ -18,6 +18,7 @@ const emptyForm = {
     cover: "",
     phone: "",
     zalo: "",
+    featuredOverride: false,
     accountUsername: "",
     accountPassword: "",
 };
@@ -79,6 +80,7 @@ export default function AdminArtisansPage() {
             cover: artisan.cover || "",
             phone: artisan.phone || "",
             zalo: artisan.zalo || "",
+            featuredOverride: Boolean(artisan.featuredOverride),
             accountUsername: "",
             accountPassword: "",
         });
@@ -115,6 +117,23 @@ export default function AdminArtisansPage() {
             showToast(saved.accountCreated ? `Đã lưu nghệ nhân và tạo tài khoản ${saved.accountUsername}.` : "Đã lưu nghệ nhân.");
         } catch (error) {
             showToast(error.message || "Unable to save artisan.", "error");
+        } finally {
+            setBusyId("");
+        }
+    };
+
+    const toggleFeaturedArtisan = async (artisan) => {
+        setBusyId(`featured-${artisan.id}`);
+        try {
+            const updated = await api.updateAdminArtisan(artisan.id, {
+                ...artisan,
+                featuredOverride: !artisan.featuredOverride,
+            });
+            setArtisans(prev => prev.map(item => item.id === updated.id ? updated : item));
+            await refreshDb();
+            showToast(updated.featuredOverride ? "Đã ghim nghệ nhân tiêu biểu." : "Đã bỏ ghim nghệ nhân tiêu biểu.");
+        } catch (error) {
+            showToast(error.message || "Không thể cập nhật nghệ nhân tiêu biểu.", "error");
         } finally {
             setBusyId("");
         }
@@ -187,6 +206,18 @@ export default function AdminArtisansPage() {
                     <div className="form-group">
                         <label>Facebook URL</label>
                         <input value={form.zalo} onChange={(e) => updateField("zalo", e.target.value)} />
+                    </div>
+                    <div className="form-group admin-featured-field">
+                        <label>Nghệ nhân tiêu biểu</label>
+                        <button
+                            type="button"
+                            className={`feature-switch ${form.featuredOverride ? "active" : ""}`}
+                            onClick={() => updateField("featuredOverride", !form.featuredOverride)}
+                            aria-pressed={form.featuredOverride}
+                        >
+                            <span></span>
+                            {form.featuredOverride ? "Đang ghim" : "Chưa ghim"}
+                        </button>
                     </div>
                     <div className="form-group-full">
                         <label>Bio</label>
@@ -267,10 +298,22 @@ export default function AdminArtisansPage() {
                                             )}
                                         </div>
                                         <div className="artisan-card-info">
-                                            <span className="artisan-card-rank">{localize(artisan.rank)}</span>
+                                            <div className="admin-artisan-card-head">
+                                                <span className="artisan-card-rank">{localize(artisan.rank)}</span>
+                                                {artisan.featuredOverride && (
+                                                    <span className="featured-source-badge pinned">Tiêu biểu</span>
+                                                )}
+                                            </div>
                                             <h3>{artisan.name}</h3>
                                             <p className="artisan-card-loc"><i className="fa-solid fa-location-dot"></i> {localize(artisan.address)}</p>
                                             <div className="contact-buttons-group" style={{ marginTop: "14px" }}>
+                                                <button
+                                                    className={`btn-secondary ${artisan.featuredOverride ? "active-featured" : ""}`}
+                                                    disabled={busyId === `featured-${artisan.id}`}
+                                                    onClick={() => toggleFeaturedArtisan(artisan)}
+                                                >
+                                                    <i className="fa-solid fa-star"></i> {artisan.featuredOverride ? "Bỏ tiêu biểu" : "Ghim tiêu biểu"}
+                                                </button>
                                                 <button className="btn-secondary" onClick={() => editArtisan(artisan)}>
                                                     <i className="fa-solid fa-pen"></i> Sửa
                                                 </button>

@@ -44,6 +44,7 @@ export default function Home() {
 
         return true;
     });
+    const featuredArtisans = getFeaturedArtisans();
 
     return (
         <div>
@@ -104,36 +105,43 @@ export default function Home() {
                 <div className="section-title-wrap">
                     <h2 className="section-title">{t("section_artisans")}</h2>
                     <div className="bamboo-divider"></div>
+                    <Link href="/artisans" className="section-view-all">
+                        Xem tất cả nhà vườn <i className="fa-solid fa-angle-right"></i>
+                    </Link>
                 </div>
                 
-                <div className="artisans-grid">
-                    {Object.values(db.artisans).map(artisan => {
-                        const totalTrees = db.trees.filter(t => t.ownerId === artisan.id && t.approved).length;
-                        const forSale = db.trees.filter(t => t.ownerId === artisan.id && t.status === "Đang giao lưu" && t.approved).length;
+                <div className="featured-artisan-list">
+                    {featuredArtisans.map(({ artisan, source }) => {
+                        const ownerTrees = db.trees.filter(t => t.ownerId === artisan.id && t.approved);
+                        const totalTrees = ownerTrees.length;
+                        const forSale = ownerTrees.filter(t => t.status === "Đang giao lưu").length;
                         const artisanAvatar = getDisplayAvatar(artisan.avatar);
 
                         return (
-                            <Link href={`/artisan/${artisan.id}`} key={artisan.id} className="artisan-card">
-                                <div className="artisan-card-banner" style={{ backgroundImage: `url('${artisan.cover}')` }}></div>
-                                <div className="artisan-card-content">
-                                    <div className={`artisan-card-avatar ${artisanAvatar ? "has-image" : ""}`}>
+                            <Link href={`/artisan/${artisan.id}`} key={artisan.id} className="featured-artisan-card">
+                                <div
+                                    className="featured-artisan-cover"
+                                    style={{ backgroundImage: `url('${artisan.cover}')` }}
+                                >
+                                    <div className={`featured-artisan-avatar ${artisanAvatar ? "has-image" : ""}`}>
                                         {artisanAvatar ? (
                                             <img src={artisanAvatar} alt={artisan.name} />
                                         ) : (
                                             <span>{getNameInitials(artisan.name)}</span>
                                         )}
                                     </div>
-                                    <div className="artisan-card-seal viet-stamp-seal">
-                                        <span>{t("viet_stamp_seal") || "Nghệ\nNhân"}</span>
-                                    </div>
-                                    <div className="artisan-card-info">
-                                        <span className="artisan-card-rank">{localize(artisan.rank).split(" ")[0]}</span>
+                                </div>
+                                <div className="featured-artisan-content">
+                                    <div className="featured-artisan-copy">
+                                        <span className={`featured-source-badge ${source === "pinned" ? "pinned" : ""}`}>
+                                            {source === "pinned" ? "Tiêu biểu" : "Hoạt động nổi bật"}
+                                        </span>
                                         <h3>{artisan.name}</h3>
-                                        <p className="artisan-card-loc"><i className="fa-solid fa-location-dot"></i> {localize(artisan.address)}</p>
-                                        <div className="artisan-card-stats">
-                                            <span>{t("artisan_tab_all")}: <strong>{totalTrees}</strong></span>
-                                            <span>{t("status_sale")}: <strong>{forSale}</strong></span>
-                                        </div>
+                                        <p><i className="fa-solid fa-location-dot"></i> {localize(artisan.address)}</p>
+                                    </div>
+                                    <div className="featured-artisan-stats">
+                                        <span>Toàn vườn <strong>{totalTrees}</strong></span>
+                                        <span>Giao lưu <strong>{forSale}</strong></span>
                                     </div>
                                 </div>
                             </Link>
@@ -220,5 +228,46 @@ export default function Home() {
         if (size === "Đại") return t("detail_back") === "Back" ? "Large (60-120cm)" : t("detail_back") === "戻る" ? "大物盆栽 (60-120cm)" : "Cỡ Đại (60-120cm)";
         if (size === "Cổ Thụ") return t("detail_back") === "Back" ? "Imperial (>120cm)" : t("detail_back") === "戻る" ? "巨大盆栽 (>120cm)" : "Cổ Thụ (>120cm)";
         return size;
+    }
+
+    function getFeaturedArtisans() {
+        return Object.values(db.artisans || {})
+            .map((artisan) => {
+                const ownerTrees = db.trees.filter(tree => tree.ownerId === artisan.id && tree.approved);
+                const recentTrees = ownerTrees.filter(isRecentTree);
+                const likes = ownerTrees.reduce((sum, tree) => sum + getTreeLikeCount(tree), 0);
+                const activityScore = recentTrees.length * 12 + ownerTrees.length * 3 + likes;
+
+                return {
+                    artisan,
+                    source: artisan.featuredOverride ? "pinned" : "auto",
+                    score: (artisan.featuredOverride ? 100000 : 0) + activityScore,
+                    recentAt: getLatestTreeTime(ownerTrees),
+                };
+            })
+            .sort((a, b) => b.score - a.score || b.recentAt - a.recentAt || a.artisan.name.localeCompare(b.artisan.name, "vi"))
+            .slice(0, 3);
+    }
+
+    function isRecentTree(tree) {
+        const timestamp = getTreeTime(tree);
+        if (!timestamp) return false;
+        return Date.now() - timestamp <= 7 * 24 * 60 * 60 * 1000;
+    }
+
+    function getLatestTreeTime(trees) {
+        return trees.reduce((latest, tree) => Math.max(latest, getTreeTime(tree)), 0);
+    }
+
+    function getTreeTime(tree) {
+        const dateValue = tree.approvedAt || tree.updatedAt || tree.createdAt || "";
+        const timestamp = Date.parse(dateValue);
+        return Number.isFinite(timestamp) ? timestamp : 0;
+    }
+
+    function getTreeLikeCount(tree) {
+        if (Array.isArray(tree.likedBy)) return tree.likedBy.length;
+        if (Array.isArray(tree.likes)) return tree.likes.length;
+        return Number(tree.likeCount || tree.likes || 0) || 0;
     }
 }
