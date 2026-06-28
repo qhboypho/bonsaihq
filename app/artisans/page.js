@@ -5,14 +5,21 @@ import Link from "next/link";
 import { useApp } from "../providers";
 import { getDisplayAvatar, getNameInitials } from "../../lib/avatar";
 
+const INITIAL_VISIBLE_ARTISANS = 12;
+const LOAD_MORE_ARTISANS = 8;
+
 export default function ArtisansPage() {
     const { db, t, localize, currentUser } = useApp();
     const [viewMode, setViewMode] = React.useState("compact");
+    const [visibleCount, setVisibleCount] = React.useState(INITIAL_VISIBLE_ARTISANS);
     const allArtisans = Object.values(db.artisans || {});
     const artisans = currentUser?.artisanId
         ? allArtisans.filter((artisan) => artisan.id !== currentUser.artisanId)
         : allArtisans;
     const isCompact = viewMode === "compact";
+    const visibleArtisans = artisans.slice(0, visibleCount);
+    const hasMoreArtisans = visibleArtisans.length < artisans.length;
+    const shownCount = visibleArtisans.length;
 
     return (
         <div>
@@ -51,46 +58,61 @@ export default function ArtisansPage() {
                     <p>Chưa có nhà vườn khác để hiển thị.</p>
                 </div>
             ) : (
-                <div className={`garden-directory-list ${isCompact ? "compact" : "grid"}`}>
-                    {artisans.map((artisan) => {
-                        const approvedTrees = db.trees.filter((tree) => tree.ownerId === artisan.id && tree.approved);
-                        const forSale = approvedTrees.filter((tree) => tree.status === "Đang giao lưu").length;
-                        const artisanAvatar = getDisplayAvatar(artisan.avatar);
-                        const rank = localize(artisan.rank);
-                        const address = localize(artisan.address);
-                        const bio = localize(artisan.bio);
+                <>
+                    <div className={`garden-directory-list ${isCompact ? "compact" : "grid"}`}>
+                        {visibleArtisans.map((artisan) => {
+                            const approvedTrees = db.trees.filter((tree) => tree.ownerId === artisan.id && tree.approved);
+                            const forSale = approvedTrees.filter((tree) => tree.status === "Đang giao lưu").length;
+                            const artisanAvatar = getDisplayAvatar(artisan.avatar);
+                            const rank = localize(artisan.rank);
+                            const address = localize(artisan.address);
+                            const bio = localize(artisan.bio);
 
-                        return (
-                            <Link href={`/artisan/${artisan.id}`} key={artisan.id} className="garden-directory-card">
-                                <div
-                                    className="garden-directory-cover"
-                                    style={{ backgroundImage: `url('${artisan.cover}')` }}
-                                    aria-label={`Ảnh bìa nhà vườn ${artisan.name}`}
-                                >
-                                    <div className={`garden-directory-avatar ${artisanAvatar ? "has-image" : ""}`}>
-                                        {artisanAvatar ? (
-                                            <img src={artisanAvatar} alt={artisan.name} />
-                                        ) : (
-                                            <span>{getNameInitials(artisan.name)}</span>
-                                        )}
+                            return (
+                                <Link href={`/artisan/${artisan.id}`} key={artisan.id} className="garden-directory-card">
+                                    <div
+                                        className="garden-directory-cover"
+                                        style={{ backgroundImage: `url('${artisan.cover}')` }}
+                                        aria-label={`Ảnh bìa nhà vườn ${artisan.name}`}
+                                    >
+                                        <div className={`garden-directory-avatar ${artisanAvatar ? "has-image" : ""}`}>
+                                            {artisanAvatar ? (
+                                                <img src={artisanAvatar} alt={artisan.name} />
+                                            ) : (
+                                                <span>{getNameInitials(artisan.name)}</span>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="garden-directory-content">
-                                    <div className="garden-directory-copy">
-                                        <span className="garden-directory-rank">{rank.split(" ")[0]}</span>
-                                        <h3>{artisan.name}</h3>
-                                        <p className="garden-directory-loc"><i className="fa-solid fa-location-dot"></i> {address}</p>
-                                        <p className="garden-directory-bio">{bio}</p>
+                                    <div className="garden-directory-content">
+                                        <div className="garden-directory-copy">
+                                            <span className="garden-directory-rank">{rank.split(" ")[0]}</span>
+                                            <h3>{artisan.name}</h3>
+                                            <p className="garden-directory-loc"><i className="fa-solid fa-location-dot"></i> {address}</p>
+                                            <p className="garden-directory-bio">{bio}</p>
+                                        </div>
+                                        <div className="garden-directory-stats">
+                                            <span>Toàn vườn <strong>{approvedTrees.length}</strong></span>
+                                            <span>Giao lưu <strong>{forSale}</strong></span>
+                                        </div>
                                     </div>
-                                    <div className="garden-directory-stats">
-                                        <span>Toàn vườn <strong>{approvedTrees.length}</strong></span>
-                                        <span>Giao lưu <strong>{forSale}</strong></span>
-                                    </div>
-                                </div>
-                            </Link>
-                        );
-                    })}
-                </div>
+                                </Link>
+                            );
+                        })}
+                    </div>
+
+                    {hasMoreArtisans && (
+                        <div className="garden-load-more">
+                            <span>Đang hiển thị {shownCount}/{artisans.length} nhà vườn</span>
+                            <button
+                                type="button"
+                                onClick={() => setVisibleCount(prev => Math.min(prev + LOAD_MORE_ARTISANS, artisans.length))}
+                            >
+                                <i className="fa-solid fa-chevron-down"></i>
+                                Xem thêm nhà vườn
+                            </button>
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );
