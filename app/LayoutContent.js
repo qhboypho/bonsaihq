@@ -19,6 +19,7 @@ export default function LayoutContent({ children }) {
     const authNavLabel = isRegisterPage
         ? (lang === "vi" ? "Đăng ký" : lang === "en" ? "Register" : "登録")
         : (lang === "vi" ? "Đăng nhập" : lang === "en" ? "Login" : "ログイン");
+    const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
     // Prevent hydration pop-ins before mounting
     if (!mounted) {
@@ -42,6 +43,7 @@ export default function LayoutContent({ children }) {
     const handleLogout = async () => {
         try {
             await logout();
+            setMobileMenuOpen(false);
             showToast("Đã đăng xuất.");
         } catch (error) {
             showToast(error.message || "Không thể đăng xuất.", "error");
@@ -124,6 +126,91 @@ export default function LayoutContent({ children }) {
                         <button className="theme-toggle-btn" id="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
                             <i className={`fa-solid ${theme === "dark" ? "fa-sun" : "fa-moon"}`}></i>
                         </button>
+
+                        <div className="mobile-header-menu">
+                            <button
+                                type="button"
+                                className={`mobile-menu-trigger ${mobileMenuOpen ? "active" : ""}`}
+                                onClick={() => setMobileMenuOpen(prev => !prev)}
+                                aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
+                                aria-expanded={mobileMenuOpen}
+                                aria-controls="mobile-header-menu-panel"
+                            >
+                                <i className={`fa-solid ${mobileMenuOpen ? "fa-xmark" : "fa-bars"}`}></i>
+                            </button>
+
+                            {mobileMenuOpen && (
+                                <div className="mobile-menu-panel" id="mobile-header-menu-panel">
+                                    {currentUser ? (
+                                        <div className="mobile-menu-user">
+                                            <span>Tài khoản</span>
+                                            <strong>{currentUser.name}</strong>
+                                        </div>
+                                    ) : (
+                                        <div className="mobile-menu-user">
+                                            <span>Bonsai Hội Quán</span>
+                                            <strong>Khách tham quan</strong>
+                                        </div>
+                                    )}
+
+                                    <div className="mobile-menu-links">
+                                        <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+                                            <i className="fa-solid fa-house"></i>
+                                            <span>Sảnh chính</span>
+                                        </Link>
+                                        <Link href={uploadHref} onClick={() => setMobileMenuOpen(false)}>
+                                            <i className="fa-solid fa-circle-plus"></i>
+                                            <span>Đăng cây cảnh</span>
+                                        </Link>
+                                        <Link href="/artisans" onClick={() => setMobileMenuOpen(false)}>
+                                            <i className="fa-solid fa-seedling"></i>
+                                            <span>Nhà vườn</span>
+                                        </Link>
+                                        {currentUser && (
+                                            <Link href={accountHref} onClick={() => setMobileMenuOpen(false)}>
+                                                <i className="fa-solid fa-user"></i>
+                                                <span>Tôi</span>
+                                            </Link>
+                                        )}
+                                        {currentUser?.role === "ADMIN" && (
+                                            <>
+                                                <Link href="/settings" onClick={() => setMobileMenuOpen(false)}>
+                                                    <i className="fa-solid fa-sliders"></i>
+                                                    <span>Cài đặt</span>
+                                                </Link>
+                                                <Link href="/admin/moderation" onClick={() => setMobileMenuOpen(false)}>
+                                                    <i className="fa-solid fa-shield-halved"></i>
+                                                    <span>Duyệt bài</span>
+                                                </Link>
+                                                <Link href="/admin/artisans" onClick={() => setMobileMenuOpen(false)}>
+                                                    <i className="fa-solid fa-user-gear"></i>
+                                                    <span>Quản lý nghệ nhân</span>
+                                                </Link>
+                                            </>
+                                        )}
+                                        {!currentUser && (
+                                            <>
+                                                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                                                    <i className="fa-solid fa-right-to-bracket"></i>
+                                                    <span>Đăng nhập</span>
+                                                </Link>
+                                                <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                                                    <i className="fa-solid fa-user-plus"></i>
+                                                    <span>Đăng ký nghệ nhân</span>
+                                                </Link>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    {currentUser && (
+                                        <button type="button" className="mobile-menu-logout" onClick={handleLogout}>
+                                            <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                                            <span>Đăng xuất</span>
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
 
                         {/* Red Seal */}
                         <div className="viet-stamp-seal">
