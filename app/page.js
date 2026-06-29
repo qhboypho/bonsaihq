@@ -135,15 +135,19 @@ export default function Home() {
                                 </div>
                                 <div className="featured-artisan-content">
                                     <div className="featured-artisan-copy">
-                                        <span className={`featured-source-badge ${source === "pinned" ? "pinned" : ""}`}>
-                                            {source === "pinned" ? "Tiêu biểu" : "Hoạt động nổi bật"}
+                                        <span
+                                            className={`featured-source-badge icon-only ${source === "pinned" ? "pinned" : ""}`}
+                                            aria-label={source === "pinned" ? "Tiêu biểu" : "Hoạt động nổi bật"}
+                                            title={source === "pinned" ? "Tiêu biểu" : "Hoạt động nổi bật"}
+                                        >
+                                            <i className={`fa-solid ${source === "pinned" ? "fa-star" : "fa-bolt"}`}></i>
                                         </span>
                                         <h3>{artisan.name}</h3>
                                         <p><i className="fa-solid fa-location-dot"></i> {localize(artisan.address)}</p>
                                     </div>
                                     <div className="featured-artisan-stats">
-                                        <span>Toàn vườn <strong>{totalTrees}</strong></span>
-                                        <span>Giao lưu <strong>{forSale}</strong></span>
+                                        <span>Toàn vườn: <strong>{totalTrees}</strong></span>
+                                        <span>Giao lưu: <strong>{forSale}</strong></span>
                                     </div>
                                 </div>
                             </Link>

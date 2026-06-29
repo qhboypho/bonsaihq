@@ -301,7 +301,13 @@ export default function AdminArtisansPage() {
                                             <div className="admin-artisan-card-head">
                                                 <span className="artisan-card-rank">{localize(artisan.rank)}</span>
                                                 {artisan.featuredOverride && (
-                                                    <span className="featured-source-badge pinned">Tiêu biểu</span>
+                                                    <span
+                                                        className="featured-source-badge icon-only pinned"
+                                                        aria-label="Tiêu biểu"
+                                                        title="Tiêu biểu"
+                                                    >
+                                                        <i className="fa-solid fa-star"></i>
+                                                    </span>
                                                 )}
                                             </div>
                                             <h3>{artisan.name}</h3>

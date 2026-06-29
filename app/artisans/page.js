@@ -91,8 +91,8 @@ export default function ArtisansPage() {
                                             <p className="garden-directory-bio">{bio}</p>
                                         </div>
                                         <div className="garden-directory-stats">
-                                            <span>Toàn vườn <strong>{approvedTrees.length}</strong></span>
-                                            <span>Giao lưu <strong>{forSale}</strong></span>
+                                            <span>Toàn vườn: <strong>{approvedTrees.length}</strong></span>
+                                            <span>Giao lưu: <strong>{forSale}</strong></span>
                                         </div>
                                     </div>
                                 </Link>
