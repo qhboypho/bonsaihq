@@ -103,8 +103,10 @@ export default function Home() {
             {/* Section: Featured Artisans */}
             <div className="section-container">
                 <div className="section-title-wrap">
-                    <h2 className="section-title">{t("section_artisans")}</h2>
-                    <div className="bamboo-divider"></div>
+                    <h2 className="section-title">
+                        <i className="fa-solid fa-award"></i>
+                        {t("section_artisans")}
+                    </h2>
                     <Link href="/artisans" className="section-view-all">
                         Xem tất cả nhà vườn <i className="fa-solid fa-angle-right"></i>
                     </Link>
@@ -153,8 +155,10 @@ export default function Home() {
             {/* Section: Recent Trees (Showcases) */}
             <div className="section-container">
                 <div className="section-title-wrap">
-                    <h2 className="section-title">{t("section_trees")}</h2>
-                    <div className="bamboo-divider"></div>
+                    <h2 className="section-title">
+                        <i className="fa-solid fa-tree"></i>
+                        {t("section_trees")}
+                    </h2>
                 </div>
                 
                 <div className="trees-grid">
