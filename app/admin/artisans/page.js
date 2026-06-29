@@ -296,19 +296,19 @@ export default function AdminArtisansPage() {
                                             ) : (
                                                 <span>{getNameInitials(artisan.name)}</span>
                                             )}
+                                            {artisan.featuredOverride && (
+                                                <span
+                                                    className="avatar-featured-badge pinned"
+                                                    aria-label="Tiêu biểu"
+                                                    title="Tiêu biểu"
+                                                >
+                                                    <i className="fa-solid fa-award"></i>
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="artisan-card-info">
                                             <div className="admin-artisan-card-head">
                                                 <span className="artisan-card-rank">{localize(artisan.rank)}</span>
-                                                {artisan.featuredOverride && (
-                                                    <span
-                                                        className="featured-source-badge icon-only pinned"
-                                                        aria-label="Tiêu biểu"
-                                                        title="Tiêu biểu"
-                                                    >
-                                                        <i className="fa-solid fa-star"></i>
-                                                    </span>
-                                                )}
                                             </div>
                                             <h3>{artisan.name}</h3>
                                             <p className="artisan-card-loc"><i className="fa-solid fa-location-dot"></i> {localize(artisan.address)}</p>

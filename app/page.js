@@ -131,17 +131,17 @@ export default function Home() {
                                         ) : (
                                             <span>{getNameInitials(artisan.name)}</span>
                                         )}
+                                        <span
+                                            className={`avatar-featured-badge ${source === "pinned" ? "pinned" : ""}`}
+                                            aria-label={source === "pinned" ? "Tiêu biểu" : "Hoạt động nổi bật"}
+                                            title={source === "pinned" ? "Tiêu biểu" : "Hoạt động nổi bật"}
+                                        >
+                                            <i className="fa-solid fa-award"></i>
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="featured-artisan-content">
                                     <div className="featured-artisan-copy">
-                                        <span
-                                            className={`featured-source-badge icon-only ${source === "pinned" ? "pinned" : ""}`}
-                                            aria-label={source === "pinned" ? "Tiêu biểu" : "Hoạt động nổi bật"}
-                                            title={source === "pinned" ? "Tiêu biểu" : "Hoạt động nổi bật"}
-                                        >
-                                            <i className={`fa-solid ${source === "pinned" ? "fa-star" : "fa-bolt"}`}></i>
-                                        </span>
                                         <h3>{artisan.name}</h3>
                                         <p><i className="fa-solid fa-location-dot"></i> {localize(artisan.address)}</p>
                                     </div>
