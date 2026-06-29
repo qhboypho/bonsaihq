@@ -25,6 +25,7 @@
 *.pem
 .codegraph/
 .data/
+.data-test/
 /public/uploads/
 
 # debug

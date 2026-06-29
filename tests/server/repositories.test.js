@@ -7,7 +7,8 @@ import { readStore } from "../../lib/server/store";
 import { getGoogleAuthSettings, getSettings, updateGoogleAuthSettings, updateModerationRequired } from "../../lib/server/repositories/settings";
 import { createTree, listTrees, updateTreeApproval } from "../../lib/server/repositories/trees";
 
-const dataDir = path.join(process.cwd(), ".data");
+const dataDir = path.join(process.cwd(), ".data-test");
+process.env.BONSAI_DATA_DIR = dataDir;
 
 async function cleanData() {
     await rm(dataDir, { recursive: true, force: true });
