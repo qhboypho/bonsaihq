@@ -4,12 +4,14 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useApp } from "./providers";
 import { getDisplayAvatar, getNameInitials } from "../lib/avatar";
+import { matchesSearch, normalizeSearchText } from "../lib/home-search";
 
 export default function Home() {
     const { db, t, localize } = useApp();
     const [searchVal, setSearchVal] = useState("");
     const [activeStyle, setActiveStyle] = useState("all");
     const [activeSize, setActiveSize] = useState("all");
+    const hasSearch = normalizeSearchText(searchVal).length > 0;
 
     // Localized statuses helper
     const getStatusText = (status) => {
@@ -29,22 +31,19 @@ export default function Home() {
         // Filter by size
         if (activeSize !== "all" && tree.size !== activeSize) return false;
 
-        // Filter by search keyword
-        if (searchVal) {
-            const query = searchVal.toLowerCase();
-            const title = localize(tree.title).toLowerCase();
-            const species = localize(tree.species).toLowerCase();
-            const style = localize(tree.style).toLowerCase();
-            const owner = db.artisans[tree.ownerId] ? db.artisans[tree.ownerId].name.toLowerCase() : "";
-            
-            if (!title.includes(query) && !species.includes(query) && !style.includes(query) && !owner.includes(query)) {
-                return false;
-            }
+        if (!matchesTreeSearch(tree)) {
+            return false;
         }
 
         return true;
     });
-    const featuredArtisans = getFeaturedArtisans();
+    const visibleArtisans = getVisibleArtisans();
+    const totalSearchResults = visibleArtisans.length + filteredTrees.length;
+
+    function handleSearchSubmit(event) {
+        event.preventDefault();
+        document.getElementById("home-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
 
     return (
         <div>
@@ -56,16 +55,17 @@ export default function Home() {
                     <p>{t("hero_subtitle")}</p>
                     
                     {/* Search Bar */}
-                    <div className="search-container">
+                    <form className="search-container" onSubmit={handleSearchSubmit} role="search">
                         <i className="fa-solid fa-magnifying-glass search-icon"></i>
                         <input 
                             type="text" 
                             placeholder={t("search_placeholder")}
                             value={searchVal}
                             onChange={(e) => setSearchVal(e.target.value)}
+                            aria-label="Tìm kiếm tác phẩm, dáng thế, nghệ nhân hoặc địa phương"
                         />
-                        <button>{t("search_btn")}</button>
-                    </div>
+                        <button type="submit">{t("search_btn")}</button>
+                    </form>
                 </div>
                 {/* Traditional Clouds SVGs */}
                 <div className="cloud-pattern cloud-1"></div>
@@ -100,6 +100,17 @@ export default function Home() {
                 </div>
             </div>
 
+            <div id="home-results">
+                {hasSearch && (
+                    <div className="search-results-summary">
+                        <i className="fa-solid fa-magnifying-glass"></i>
+                        <span>
+                            Tìm thấy <strong>{totalSearchResults}</strong> kết quả cho <strong>&quot;{searchVal.trim()}&quot;</strong>
+                        </span>
+                    </div>
+                )}
+            </div>
+
             {/* Section: Featured Artisans */}
             <div className="section-container">
                 <div className="section-title-wrap">
@@ -113,7 +124,12 @@ export default function Home() {
                 </div>
                 
                 <div className="featured-artisan-list">
-                    {featuredArtisans.map(({ artisan, source }) => {
+                    {visibleArtisans.length === 0 ? (
+                        <div className="no-results-card home-search-empty">
+                            <i className="fa-solid fa-user-magnifying-glass text-secondary" style={{ fontSize: "2.2rem", marginBottom: "12px", display: "block" }}></i>
+                            <p>Không tìm thấy nghệ nhân phù hợp với từ khóa hiện tại.</p>
+                        </div>
+                    ) : visibleArtisans.map(({ artisan, source }) => {
                         const ownerTrees = db.trees.filter(t => t.ownerId === artisan.id && t.approved);
                         const totalTrees = ownerTrees.length;
                         const forSale = ownerTrees.filter(t => t.status === "Đang giao lưu").length;
@@ -178,14 +194,7 @@ export default function Home() {
                             if (tree.status === "Đang giao lưu") statusClass = "sale";
                             else if (tree.status === "Trưng bày") statusClass = "exhibit";
 
-                            let priceText = "";
-                            if (tree.status === "Đang giao lưu") {
-                                priceText = tree.price ? `${parseInt(tree.price).toLocaleString('vi-VN')} đ` : t("detail_price_contact");
-                            } else if (tree.status === "Trưng bày") {
-                                priceText = t("detail_price_exhibit");
-                            } else {
-                                priceText = t("detail_price_training");
-                            }
+                            const priceText = getTreePriceText(tree);
 
                             return (
                                 <Link href={`/tree/${tree.id}`} key={tree.id} className="tree-card">
@@ -236,6 +245,81 @@ export default function Home() {
         if (size === "Đại") return t("detail_back") === "Back" ? "Large (60-120cm)" : t("detail_back") === "戻る" ? "大物盆栽 (60-120cm)" : "Cỡ Đại (60-120cm)";
         if (size === "Cổ Thụ") return t("detail_back") === "Back" ? "Imperial (>120cm)" : t("detail_back") === "戻る" ? "巨大盆栽 (>120cm)" : "Cổ Thụ (>120cm)";
         return size;
+    }
+
+    function getTreePriceText(tree) {
+        if (tree.status === "Đang giao lưu") {
+            return tree.price ? `${parseInt(tree.price).toLocaleString('vi-VN')} đ` : t("detail_price_contact");
+        }
+        if (tree.status === "Trưng bày") return t("detail_price_exhibit");
+        return t("detail_price_training");
+    }
+
+    function matchesTreeSearch(tree) {
+        const owner = db.artisans[tree.ownerId] || {};
+        return matchesSearch([
+            localize(tree.title),
+            localize(tree.species),
+            localize(tree.style),
+            langStyle(tree.style),
+            localize(tree.size),
+            langSize(tree.size),
+            tree.status,
+            getStatusText(tree.status),
+            getTreePriceText(tree),
+            owner.name,
+            localize(owner.rank),
+            localize(owner.address),
+            localize(owner.bio),
+            "tác phẩm",
+            "bonsai",
+        ], searchVal);
+    }
+
+    function getVisibleArtisans() {
+        if (!hasSearch) return getFeaturedArtisans();
+
+        return Object.values(db.artisans || {})
+            .map((artisan) => ({
+                artisan,
+                source: artisan.featuredOverride ? "pinned" : "auto",
+            }))
+            .filter(({ artisan, source }) => matchesArtisanSearch(artisan, source));
+    }
+
+    function matchesArtisanSearch(artisan, source) {
+        const ownerTrees = db.trees.filter(tree => tree.ownerId === artisan.id && tree.approved);
+        const forSale = ownerTrees.filter(tree => tree.status === "Đang giao lưu").length;
+        const sourceText = source === "pinned" ? "Tiêu biểu" : "Hoạt động nổi bật";
+        const treeParts = ownerTrees.flatMap(tree => [
+            localize(tree.title),
+            localize(tree.species),
+            localize(tree.style),
+            langStyle(tree.style),
+            localize(tree.size),
+            langSize(tree.size),
+            tree.status,
+            getStatusText(tree.status),
+        ]);
+
+        return matchesSearch([
+            artisan.id,
+            artisan.name,
+            localize(artisan.rank),
+            localize(artisan.address),
+            localize(artisan.bio),
+            artisan.phone,
+            artisan.zaloUrl,
+            artisan.facebookUrl,
+            sourceText,
+            "nghệ nhân",
+            "nhà vườn",
+            "toàn vườn",
+            ownerTrees.length,
+            "giao lưu",
+            forSale,
+            ...treeParts,
+        ], searchVal);
     }
 
     function getFeaturedArtisans() {
