@@ -12,8 +12,9 @@ export default function TreeDetail() {
 
     const tree = db.trees.find(t => t.id === treeId);
     
-    // Set active photo index
+    // Set active photo index & Lightbox fullscreen state
     const [activePhotoIdx, setActivePhotoIdx] = useState(0);
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
     if (!tree) {
         return (
@@ -70,9 +71,17 @@ export default function TreeDetail() {
             <div className="detail-layout">
                 {/* Left Column: Image Viewer */}
                 <div className="detail-images-panel">
-                    <div className="main-image-viewer">
+                    <div 
+                        className="main-image-viewer" 
+                        style={{ cursor: "zoom-in" }} 
+                        onClick={() => setIsLightboxOpen(true)}
+                        title={t("detail_back") === "Back" ? "Click to view fullscreen" : t("detail_back") === "戻る" ? "拡大表示" : "Click để xem phóng to"}
+                    >
                         <img src={tree.images[activePhotoIdx]} alt={localize(tree.title)} />
                         <span className={`tree-status-badge ${statusClass}`}>{getStatusText(tree.status)}</span>
+                        <div style={{ position: "absolute", bottom: "12px", right: "12px", background: "rgba(0,0,0,0.6)", color: "#FFF", padding: "6px 12px", borderRadius: "20px", fontSize: "0.8rem", backdropFilter: "blur(4px)" }}>
+                            <i className="fa-solid fa-expand"></i> {t("detail_back") === "Back" ? "Zoom" : t("detail_back") === "戻る" ? "拡大" : "Phóng to"}
+                        </div>
                     </div>
                     <div className="thumbnail-slider">
                         {tree.images.map((imgUrl, idx) => (
@@ -86,6 +95,21 @@ export default function TreeDetail() {
                         ))}
                     </div>
                 </div>
+
+                {/* Lightbox Modal */}
+                {isLightboxOpen && (
+                    <div className="lightbox-backdrop" onClick={() => setIsLightboxOpen(false)}>
+                        <button className="lightbox-close-btn" onClick={() => setIsLightboxOpen(false)} aria-label="Close">
+                            <i className="fa-solid fa-xmark"></i>
+                        </button>
+                        <div className="lightbox-img-wrapper" onClick={(e) => e.stopPropagation()}>
+                            <img src={tree.images[activePhotoIdx]} alt={localize(tree.title)} className="lightbox-img" />
+                        </div>
+                        <div className="lightbox-caption">
+                            {localize(tree.title)} - {activePhotoIdx + 1}/{tree.images.length}
+                        </div>
+                    </div>
+                )}
 
                 {/* Right Column: Specs Panel */}
                 <div className="detail-info-panel">
