@@ -78,7 +78,10 @@ export default function Home() {
                             onChange={(e) => setSearchVal(e.target.value)}
                             aria-label="Tìm kiếm tác phẩm, dáng thế, nghệ nhân hoặc địa phương"
                         />
-                        <button type="submit">{t("search_btn")}</button>
+                        <button type="submit" aria-label={t("search_btn")}>
+                            <span className="search-btn-text">{t("search_btn")}</span>
+                            <i className="fa-solid fa-magnifying-glass search-btn-icon"></i>
+                        </button>
                     </form>
                 </div>
                 {/* Traditional Clouds SVGs */}
