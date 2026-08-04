@@ -11,7 +11,20 @@ export default function Home() {
     const [searchVal, setSearchVal] = useState("");
     const [activeStyle, setActiveStyle] = useState("all");
     const [activeSize, setActiveSize] = useState("all");
+    const [isFiltering, setIsFiltering] = useState(false);
     const hasSearch = normalizeSearchText(searchVal).length > 0;
+
+    const handleStyleChange = (style) => {
+        setIsFiltering(true);
+        setActiveStyle(style);
+        setTimeout(() => setIsFiltering(false), 200);
+    };
+
+    const handleSizeChange = (size) => {
+        setIsFiltering(true);
+        setActiveSize(size);
+        setTimeout(() => setIsFiltering(false), 200);
+    };
 
     // Localized statuses helper
     const getStatusText = (status) => {
@@ -77,25 +90,25 @@ export default function Home() {
                 <div className="filter-group">
                     <h3>{t("filter_style_title")}</h3>
                     <div className="filter-chips">
-                        <button className={`chip ${activeStyle === "all" ? "active" : ""}`} onClick={() => setActiveStyle("all")}>{t("filter_all_styles")}</button>
-                        <button className={`chip ${activeStyle === "Trực" ? "active" : ""}`} onClick={() => setActiveStyle("Trực")}>{langStyle("Trực")}</button>
-                        <button className={`chip ${activeStyle === "Trực Lắc" ? "active" : ""}`} onClick={() => setActiveStyle("Trực Lắc")}>{langStyle("Trực Lắc")}</button>
-                        <button className={`chip ${activeStyle === "Huyền / Thác Đổ" ? "active" : ""}`} onClick={() => setActiveStyle("Huyền / Thác Đổ")}>{langStyle("Huyền / Thác Đổ")}</button>
-                        <button className={`chip ${activeStyle === "Hoành" ? "active" : ""}`} onClick={() => setActiveStyle("Hoành")}>{langStyle("Hoành")}</button>
-                        <button className={`chip ${activeStyle === "Xiêu / Tà" ? "active" : ""}`} onClick={() => setActiveStyle("Xiêu / Tà")}>{langStyle("Xiêu / Tà")}</button>
-                        <button className={`chip ${activeStyle === "Bạt Phong" ? "active" : ""}`} onClick={() => setActiveStyle("Bạt Phong")}>{langStyle("Bạt Phong")}</button>
+                        <button className={`chip ${activeStyle === "all" ? "active" : ""}`} onClick={() => handleStyleChange("all")}>{t("filter_all_styles")}</button>
+                        <button className={`chip ${activeStyle === "Trực" ? "active" : ""}`} onClick={() => handleStyleChange("Trực")}>{langStyle("Trực")}</button>
+                        <button className={`chip ${activeStyle === "Trực Lắc" ? "active" : ""}`} onClick={() => handleStyleChange("Trực Lắc")}>{langStyle("Trực Lắc")}</button>
+                        <button className={`chip ${activeStyle === "Huyền / Thác Đổ" ? "active" : ""}`} onClick={() => handleStyleChange("Huyền / Thác Đổ")}>{langStyle("Huyền / Thác Đổ")}</button>
+                        <button className={`chip ${activeStyle === "Hoành" ? "active" : ""}`} onClick={() => handleStyleChange("Hoành")}>{langStyle("Hoành")}</button>
+                        <button className={`chip ${activeStyle === "Xiêu / Tà" ? "active" : ""}`} onClick={() => handleStyleChange("Xiêu / Tà")}>{langStyle("Xiêu / Tà")}</button>
+                        <button className={`chip ${activeStyle === "Bạt Phong" ? "active" : ""}`} onClick={() => handleStyleChange("Bạt Phong")}>{langStyle("Bạt Phong")}</button>
                     </div>
                 </div>
 
                 <div className="filter-group">
                     <h3>{t("filter_size_title")}</h3>
                     <div className="filter-chips">
-                        <button className={`chip ${activeSize === "all" ? "active" : ""}`} onClick={() => setActiveSize("all")}>{t("filter_all_sizes")}</button>
-                        <button className={`chip ${activeSize === "Siêu Mini" ? "active" : ""}`} onClick={() => setActiveSize("Siêu Mini")}>{langSize("Siêu Mini")}</button>
-                        <button className={`chip ${activeSize === "Mini" ? "active" : ""}`} onClick={() => setActiveSize("Mini")}>{langSize("Mini")}</button>
-                        <button className={`chip ${activeSize === "Trung" ? "active" : ""}`} onClick={() => setActiveSize("Trung")}>{langSize("Trung")}</button>
-                        <button className={`chip ${activeSize === "Đại" ? "active" : ""}`} onClick={() => setActiveSize("Đại")}>{langSize("Đại")}</button>
-                        <button className={`chip ${activeSize === "Cổ Thụ" ? "active" : ""}`} onClick={() => setActiveSize("Cổ Thụ")}>{langSize("Cổ Thụ")}</button>
+                        <button className={`chip ${activeSize === "all" ? "active" : ""}`} onClick={() => handleSizeChange("all")}>{t("filter_all_sizes")}</button>
+                        <button className={`chip ${activeSize === "Siêu Mini" ? "active" : ""}`} onClick={() => handleSizeChange("Siêu Mini")}>{langSize("Siêu Mini")}</button>
+                        <button className={`chip ${activeSize === "Mini" ? "active" : ""}`} onClick={() => handleSizeChange("Mini")}>{langSize("Mini")}</button>
+                        <button className={`chip ${activeSize === "Trung" ? "active" : ""}`} onClick={() => handleSizeChange("Trung")}>{langSize("Trung")}</button>
+                        <button className={`chip ${activeSize === "Đại" ? "active" : ""}`} onClick={() => handleSizeChange("Đại")}>{langSize("Đại")}</button>
+                        <button className={`chip ${activeSize === "Cổ Thụ" ? "active" : ""}`} onClick={() => handleSizeChange("Cổ Thụ")}>{langSize("Cổ Thụ")}</button>
                     </div>
                 </div>
             </div>
@@ -182,7 +195,18 @@ export default function Home() {
                 </div>
                 
                 <div className="trees-grid">
-                    {filteredTrees.length === 0 ? (
+                    {isFiltering ? (
+                        [1, 2, 3, 4].map(idx => (
+                            <div key={idx} className="skeleton-card">
+                                <div className="skeleton-img"></div>
+                                <div className="skeleton-body">
+                                    <div className="skeleton-line short"></div>
+                                    <div className="skeleton-line title"></div>
+                                    <div className="skeleton-line short"></div>
+                                </div>
+                            </div>
+                        ))
+                    ) : filteredTrees.length === 0 ? (
                         <div className="no-results-card">
                             <i className="fa-solid fa-wind text-secondary" style={{ fontSize: "2.5rem", marginBottom: "12px", display: "block" }}></i>
                             <p>{t("filter_empty") || "Không tìm thấy tác phẩm nào phù hợp với bộ lọc hiện tại."}</p>
