@@ -7,6 +7,7 @@
     --bg-primary: #FAF6F0;       /* Sách cổ / Lụa tơ tằm */
     --bg-secondary: #F3ECE0;     /* Silk beige */
     --bg-card: #FCFAF6;
+    --bg-card-rgb: 252, 250, 246;
     --text-primary: #192720;     /* Xanh thông đen cổ thụ */
     --text-secondary: #56645C;   /* Rêu mờ */
     --color-primary: #1C3B2B;    /* Xanh rêu chính */
@@ -30,6 +31,7 @@
     --bg-primary: #0C120F;       /* Rừng rậm ban đêm */
     --bg-secondary: #121A16;     /* Bóng tre đêm */
     --bg-card: #16221C;
+    --bg-card-rgb: 22, 34, 28;
     --text-primary: #ECE6DB;     /* Linen ấm */
     --text-secondary: #9AA7A0;   /* Sương khói */
     --color-primary: #4E8C6F;    /* Lá non dưới trăng */
@@ -3370,28 +3372,36 @@ body::before {
     .filter-section {
         position: relative;
         overflow: hidden;
-        transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding-bottom 0.3s ease;
-        padding-bottom: 48px;
+        transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .filter-section.mobile-collapsed {
-        max-height: 175px;
+        max-height: 165px;
+        padding-bottom: 48px;
     }
 
     .filter-section.mobile-expanded {
         max-height: 850px;
+        padding-bottom: 48px;
     }
 
     .filter-gradient-overlay {
         display: block;
         position: absolute;
-        bottom: 42px;
+        bottom: 0;
         left: 0;
         right: 0;
-        height: 70px;
-        background: linear-gradient(to bottom, rgba(0, 0, 0, 0), var(--bg-card) 90%);
+        height: 110px;
+        background: linear-gradient(
+            to bottom,
+            rgba(var(--bg-card-rgb), 0) 0%,
+            rgba(var(--bg-card-rgb), 0.65) 45%,
+            rgba(var(--bg-card-rgb), 0.95) 75%,
+            rgba(var(--bg-card-rgb), 1) 100%
+        );
         pointer-events: none;
         z-index: 2;
+        transition: opacity 0.3s ease;
     }
 
     .filter-expand-toggle-btn {
@@ -3405,7 +3415,11 @@ body::before {
         right: 0;
         width: 100%;
         height: 44px;
-        background: rgba(var(--color-primary-rgb), 0.08);
+        background: linear-gradient(
+            to bottom,
+            rgba(var(--bg-card-rgb), 0.85),
+            rgba(var(--bg-card-rgb), 1)
+        );
         border: none;
         border-top: 1px solid var(--border-color);
         color: var(--color-primary);
