@@ -12,6 +12,7 @@ export default function Home() {
     const [activeStyle, setActiveStyle] = useState("all");
     const [activeSize, setActiveSize] = useState("all");
     const [isFiltering, setIsFiltering] = useState(false);
+    const [isMobileFilterExpanded, setIsMobileFilterExpanded] = useState(false);
     const hasSearch = normalizeSearchText(searchVal).length > 0;
 
     const handleStyleChange = (style) => {
@@ -86,7 +87,7 @@ export default function Home() {
             </div>
 
             {/* Quick Filters */}
-            <div className="filter-section">
+            <div className={`filter-section ${isMobileFilterExpanded ? "mobile-expanded" : "mobile-collapsed"}`}>
                 <div className="filter-group">
                     <h3>{t("filter_style_title")}</h3>
                     <div className="filter-chips">
@@ -111,6 +112,19 @@ export default function Home() {
                         <button className={`chip ${activeSize === "Cổ Thụ" ? "active" : ""}`} onClick={() => handleSizeChange("Cổ Thụ")}>{langSize("Cổ Thụ")}</button>
                     </div>
                 </div>
+
+                {/* Mobile Gradient Overlay */}
+                {!isMobileFilterExpanded && <div className="filter-gradient-overlay"></div>}
+
+                {/* Mobile Expand / Collapse Toggle Button */}
+                <button 
+                    type="button"
+                    className="filter-expand-toggle-btn"
+                    onClick={() => setIsMobileFilterExpanded(!isMobileFilterExpanded)}
+                    aria-label={isMobileFilterExpanded ? t("filter_collapse") : t("filter_expand")}
+                >
+                    <span>{isMobileFilterExpanded ? t("filter_collapse") : t("filter_expand")}</span>
+                </button>
             </div>
 
             <div id="home-results">

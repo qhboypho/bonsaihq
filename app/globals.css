@@ -907,6 +907,11 @@ body::before {
     gap: 20px;
 }
 
+.filter-expand-toggle-btn,
+.filter-gradient-overlay {
+    display: none;
+}
+
 .filter-group h3 {
     font-size: 0.95rem;
     color: var(--text-secondary);
@@ -3359,6 +3364,65 @@ body::before {
     .hero-banner {
         padding: 40px 20px;
         margin-bottom: 24px;
+    }
+
+    /* Mobile Collapsible Quick Filters */
+    .filter-section {
+        position: relative;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding-bottom 0.3s ease;
+        padding-bottom: 48px;
+    }
+
+    .filter-section.mobile-collapsed {
+        max-height: 175px;
+    }
+
+    .filter-section.mobile-expanded {
+        max-height: 850px;
+    }
+
+    .filter-gradient-overlay {
+        display: block;
+        position: absolute;
+        bottom: 42px;
+        left: 0;
+        right: 0;
+        height: 70px;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0), var(--bg-card) 90%);
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .filter-expand-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 44px;
+        background: rgba(var(--color-primary-rgb), 0.08);
+        border: none;
+        border-top: 1px solid var(--border-color);
+        color: var(--color-primary);
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.88rem;
+        font-weight: 700;
+        cursor: pointer;
+        z-index: 3;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .filter-expand-toggle-btn:hover {
+        background: rgba(var(--color-primary-rgb), 0.16);
+    }
+
+    .filter-expand-toggle-btn:active {
+        transform: scale(0.98);
     }
     .hero-text-content h2 {
         font-size: 1.95rem;
