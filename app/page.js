@@ -70,7 +70,7 @@ export default function Home() {
                     
                     {/* Search Bar */}
                     <form className="search-container" onSubmit={handleSearchSubmit} role="search">
-                        <i className="fa-solid fa-magnifying-glass search-icon"></i>
+                        <i className="fa-solid fa-seedling search-icon"></i>
                         <input 
                             type="text" 
                             placeholder={t("search_placeholder")}
@@ -78,7 +78,17 @@ export default function Home() {
                             onChange={(e) => setSearchVal(e.target.value)}
                             aria-label="Tìm kiếm tác phẩm, dáng thế, nghệ nhân hoặc địa phương"
                         />
-                        <button type="submit" aria-label={t("search_btn")}>
+                        {searchVal.length > 0 && (
+                            <button 
+                                type="button" 
+                                className="search-clear-btn" 
+                                onClick={() => setSearchVal("")}
+                                aria-label="Xóa từ khóa tìm kiếm"
+                            >
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                        )}
+                        <button type="submit" className="search-submit-btn" aria-label={t("search_btn")}>
                             <span className="search-btn-text">{t("search_btn")}</span>
                             <i className="fa-solid fa-magnifying-glass search-btn-icon"></i>
                         </button>
